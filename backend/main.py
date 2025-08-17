@@ -10,8 +10,9 @@ import tempfile
 import shutil
 
 # Import our custom modules
-from database import Document, DocumentChunk, insert_document, update_document_status, insert_document_chunks, search_similar_chunks
+from database import Document, DocumentChunk, insert_document, update_document_status, insert_document_chunks
 from document_processor import DocumentProcessor, save_uploaded_file
+from rag_search import search_similar_chunks, embed_text, ping_embedding_model, ping_database
 
 # Load environment variables
 load_dotenv()
@@ -42,9 +43,13 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[Message]
+    use_rag: Optional[bool] = False
+    top_k: Optional[int] = 4
+    document_id: Optional[str] = None
 
 class ChatResponse(BaseModel):
     response: str
+    citations: Optional[List[Dict[str, Any]]] = None
 
 class ErrorResponse(BaseModel):
     error: str
@@ -95,7 +100,7 @@ async def api_status() -> Dict[str, Any]:
 
 @app.post("/api/llm/chat", response_model=ChatResponse, responses={500: {"model": ErrorResponse}})
 async def chat_with_mistral(request: ChatRequest):
-    """Chat with Mistral-7B-Instruct model via Hugging Face Router API"""
+    """Chat with Mistral-7B-Instruct model via Hugging Face Router API with optional RAG"""
     
     try:
         # Get the last user message
@@ -107,6 +112,8 @@ async def chat_with_mistral(request: ChatRequest):
         if last_message.role != "user":
             raise HTTPException(status_code=400, detail="Last message must be from user")
         
+        question = last_message.content
+        
         # Get API key from environment
         hf_api_key = os.getenv("HF_API_KEY")
         if not hf_api_key:
@@ -114,6 +121,8 @@ async def chat_with_mistral(request: ChatRequest):
             raise HTTPException(status_code=500, detail="HF_API_KEY not configured")
         
         print(f"✅ Using API key: {hf_api_key[:10]}...")
+        print(f"📤 User message: {question}")
+        print(f"🔍 RAG enabled: {request.use_rag}")
         
         # Initialize OpenAI client with Hugging Face Router API
         client = OpenAI(
@@ -121,19 +130,69 @@ async def chat_with_mistral(request: ChatRequest):
             api_key=hf_api_key,
         )
         
+        citations = []
+        final_prompt = question
+        
+        if request.use_rag:
+            try:
+                print("🔍 Searching for relevant document chunks...")
+                
+                # Search for similar chunks
+                similar_chunks = await search_similar_chunks(
+                    query=question, 
+                    top_k=request.top_k, 
+                    document_id=request.document_id
+                )
+                
+                if similar_chunks:
+                    print(f"✅ Found {len(similar_chunks)} relevant chunks")
+                    
+                    # Build system prompt
+                    system_prompt = "You are an assistant. Use only the context sections provided to answer. If the answer is not present in the context, say you don't know."
+                    
+                    # Build context block with citations
+                    context_blocks = []
+                    for chunk in similar_chunks:
+                        context_blocks.append(f"[doc:{chunk['document_id']}#chunk:{chunk['chunk_index']}]\n{chunk['content']}")
+                        
+                        # Add to citations
+                        citations.append({
+                            "id": chunk["id"],
+                            "document_id": chunk["document_id"],
+                            "chunk_index": chunk["chunk_index"],
+                            "similarity": chunk["similarity"],
+                            "snippet": chunk["content"][:100] + "..." if len(chunk["content"]) > 100 else chunk["content"]
+                        })
+                    
+                    # Compose final prompt
+                    context_text = "\n\n".join(context_blocks)
+                    
+                    # Build messages for the LLM
+                    messages = [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": f"Context:\n{context_text}\n\nQuestion: {question}\n\nAnswer:"}
+                    ]
+                    
+                    print(f"📝 Final prompt length: {len(str(messages))} characters")
+                    
+                else:
+                    print("⚠️ No relevant chunks found, proceeding without RAG")
+                    messages = [{"role": "user", "content": question}]
+                    
+            except Exception as e:
+                print(f"⚠️ RAG search failed: {str(e)}, proceeding without RAG")
+                messages = [{"role": "user", "content": question}]
+        else:
+            # No RAG, use original message
+            messages = [{"role": "user", "content": question}]
+        
         print("🚀 Making request to Hugging Face Router API...")
-        print(f"📤 User message: {last_message.content}")
         
         # Make request using OpenAI client
         completion = client.chat.completions.create(
             model="mistralai/Mistral-7B-Instruct-v0.2:featherless-ai",
-            messages=[
-                {
-                    "role": "user",
-                    "content": last_message.content
-                }
-            ],
-            max_tokens=256,
+            messages=messages,
+            max_tokens=512,  # Increased for RAG responses
             temperature=0.7,
             top_p=0.95,
         )
@@ -142,7 +201,12 @@ async def chat_with_mistral(request: ChatRequest):
         generated_text = completion.choices[0].message.content
         
         print(f"✅ Generated text: {generated_text}")
-        return ChatResponse(response=generated_text)
+        
+        # Return response with citations if RAG was used
+        if request.use_rag and citations:
+            return ChatResponse(response=generated_text, citations=citations)
+        else:
+            return ChatResponse(response=generated_text)
         
     except Exception as e:
         # Log the error for debugging
@@ -277,6 +341,25 @@ async def list_documents():
     except Exception as e:
         print(f"❌ Error listing documents: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error listing documents: {str(e)}")
+
+@app.get("/api/rag/ping")
+async def rag_ping():
+    """Ping RAG system to check if embedding model and database are working"""
+    try:
+        # Check embedding model
+        model_ok = ping_embedding_model()
+        
+        # Check database connection
+        db_ok = await ping_database()
+        
+        if model_ok and db_ok:
+            return {"ok": True, "embedding_model": "loaded", "database": "connected"}
+        else:
+            return {"ok": False, "embedding_model": "loaded" if model_ok else "failed", "database": "connected" if db_ok else "failed"}
+            
+    except Exception as e:
+        print(f"❌ RAG ping failed: {str(e)}")
+        return {"ok": False, "error": str(e)}
 
 if __name__ == "__main__":
     import uvicorn

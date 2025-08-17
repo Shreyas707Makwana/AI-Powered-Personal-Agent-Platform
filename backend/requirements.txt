@@ -19,3 +19,6 @@ transformers>=4.30.0
 numpy>=1.21.0
 pandas>=1.3.0
 pymupdf>=1.23.0
+
+# Additional dependencies for RAG integration
+requests>=2.31.0

@@ -28,5 +28,17 @@ curl -X POST "http://localhost:8000/api/llm/chat" ^
 
 echo.
 echo.
+echo 🔍 Testing RAG ping endpoint...
+curl -X GET "http://localhost:8000/api/rag/ping"
+
+echo.
+echo.
+echo 📚 Testing RAG-enabled chat (if you have documents uploaded)...
+curl -X POST "http://localhost:8000/api/llm/chat" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"messages\": [{\"role\": \"user\", \"content\": \"What is this document about?\"}], \"use_rag\": true, \"top_k\": 3}"
+
+echo.
+echo.
 echo ✅ Test completed!
 pause

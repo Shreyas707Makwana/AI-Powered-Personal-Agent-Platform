@@ -60,12 +60,20 @@ pip install -r requirements.txt
 - Create a Supabase project at [supabase.com](https://supabase.com)
 - Get your project URL and anon key
 - Run the database schema: `psql -h your-host -U postgres -d your-db -f schema.sql`
+- Ensure pgvector extension is enabled in your Supabase project
 
 ### 3. Setup Environment
 ```bash
 python setup_env.py
 ```
 Enter your API key and Supabase credentials when prompted.
+
+**Required Environment Variables:**
+- `HF_API_KEY`: Your Hugging Face API key
+- `SUPABASE_URL`: Your Supabase project URL
+- `SUPABASE_KEY`: Your Supabase anon key
+- `DATABASE_URL`: PostgreSQL connection string (for direct DB access)
+- `EMBEDDING_MODEL`: Hugging Face model for embeddings (default: sentence-transformers/all-MiniLM-L6-v2)
 
 ### 4. Verify Configuration
 ```bash
@@ -77,6 +85,41 @@ python test_env_simple.py
 ### Test Hugging Face Router API
 ```bash
 python test_hf_router.py
+```
+
+### Test RAG-Enabled Chat with curl
+
+**1. Regular Chat (no RAG):**
+```bash
+curl -X POST "http://localhost:8000/api/llm/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{"role": "user", "content": "Hello! What is the capital of France?"}],
+    "use_rag": false
+  }'
+```
+
+**2. RAG-Enabled Chat:**
+```bash
+curl -X POST "http://localhost:8000/api/llm/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{"role": "user", "content": "What is this document about?"}],
+    "use_rag": true,
+    "top_k": 3
+  }'
+```
+
+**3. RAG Chat with Document Filter:**
+```bash
+curl -X POST "http://localhost:8000/api/llm/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{"role": "user", "content": "Tell me about the content in this specific document"}],
+    "use_rag": true,
+    "top_k": 2,
+    "document_id": "1"
+  }'
 ```
 
 ### Quick System Test
@@ -97,6 +140,11 @@ python test_models.py
 ### Test RAG Functionality
 ```bash
 python test_rag.py
+```
+
+### Test RAG-Enabled Chat
+```bash
+python test_rag_chat.py
 ```
 
 ## 🚀 Running the Server
@@ -197,6 +245,45 @@ Chat with Mistral model
 }
 ```
 
+### POST `/api/llm/chat` (RAG-Enabled)
+Chat with Mistral model using RAG for document context
+
+**Request with RAG:**
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is this document about?"
+    }
+  ],
+  "use_rag": true,
+  "top_k": 4,
+  "document_id": null
+}
+```
+
+**Response with Citations:**
+```json
+{
+  "response": "Based on the document content, this appears to be about...",
+  "citations": [
+    {
+      "id": 1,
+      "document_id": 1,
+      "chunk_index": 0,
+      "similarity": 0.92,
+      "snippet": "This document discusses the fundamentals of..."
+    }
+  ]
+}
+```
+
+**Parameters:**
+- `use_rag`: Enable/disable RAG functionality (default: false)
+- `top_k`: Number of document chunks to retrieve (default: 4)
+- `document_id`: Filter to specific document (optional)
+
 ### POST `/api/ingest/upload`
 Upload and process a PDF document for RAG
 ```bash
@@ -240,6 +327,16 @@ Search documents using semantic similarity
 
 ### GET `/api/ingest/documents`
 List all uploaded documents
+
+### GET `/api/rag/ping`
+Check RAG system status (embedding model and database)
+```json
+{
+  "ok": true,
+  "embedding_model": "loaded",
+  "database": "connected"
+}
+```
 ```json
 {
   "documents": [
@@ -254,6 +351,23 @@ List all uploaded documents
   "total": 1
 }
 ```
+
+## 🔍 RAG Integration Architecture
+
+### How RAG Works
+1. **Document Processing**: PDFs are uploaded, text extracted, and chunked into ~500 token pieces
+2. **Embedding Generation**: Each chunk gets a vector embedding using sentence-transformers
+3. **Vector Storage**: Embeddings stored in Supabase with pgvector extension
+4. **Semantic Search**: User queries are embedded and matched against stored vectors
+5. **Context Retrieval**: Top-k most similar chunks are retrieved
+6. **LLM Generation**: Context + question sent to Mistral-7B for answer generation
+7. **Citation Tracking**: Each response includes source document and chunk information
+
+### RAG Components
+- **`rag_search.py`**: Core RAG functionality (embeddings, vector search, DB operations)
+- **`document_processor.py`**: PDF processing and chunking
+- **`database.py`**: Supabase integration and data models
+- **Enhanced Chat Endpoint**: `/api/llm/chat` with RAG support
 
 ## 🌐 Hugging Face Integration
 

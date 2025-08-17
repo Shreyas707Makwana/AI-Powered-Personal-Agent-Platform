@@ -47,6 +47,9 @@ REDIS_URL=redis://localhost:6379
 HUGGINGFACE_API_KEY={api_key}
 HF_API_KEY={api_key}
 
+# RAG Configuration
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+
 # JWT Configuration
 JWT_SECRET_KEY=your_jwt_secret_key_here
 JWT_ALGORITHM=HS256
