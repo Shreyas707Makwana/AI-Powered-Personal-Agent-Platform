@@ -7,6 +7,10 @@ A FastAPI-based backend for the AI-Powered Personal Agent Platform, featuring in
 - **FastAPI Backend**: Modern, fast web framework for building APIs
 - **Hugging Face Integration**: Uses the Router API for reliable model access
 - **Mistral-7B-Instruct**: State-of-the-art language model for chat interactions
+- **RAG (Retrieval-Augmented Generation)**: Document ingestion and semantic search
+- **PDF Processing**: Text extraction and chunking with PyMuPDF
+- **Vector Embeddings**: Sentence transformers for semantic similarity
+- **Supabase Integration**: Document storage and vector search
 - **Environment Management**: Secure configuration with .env files
 - **CORS Support**: Ready for frontend integration
 - **Comprehensive Testing**: Multiple test scripts for validation
@@ -52,13 +56,18 @@ pip install -r requirements.txt
 - Create a new token (starts with `hf_`)
 - Copy the token
 
-### 2. Setup Environment
+### 2. Setup Supabase (for RAG functionality)
+- Create a Supabase project at [supabase.com](https://supabase.com)
+- Get your project URL and anon key
+- Run the database schema: `psql -h your-host -U postgres -d your-db -f schema.sql`
+
+### 3. Setup Environment
 ```bash
 python setup_env.py
 ```
-Enter your API key when prompted.
+Enter your API key and Supabase credentials when prompted.
 
-### 3. Verify Configuration
+### 4. Verify Configuration
 ```bash
 python test_env_simple.py
 ```
@@ -83,6 +92,11 @@ python debug_env.py
 ### Test Different Models
 ```bash
 python test_models.py
+```
+
+### Test RAG Functionality
+```bash
+python test_rag.py
 ```
 
 ## 🚀 Running the Server
@@ -117,7 +131,11 @@ backend/
 ├── .env                   # Environment variables (not in git)
 ├── env.example            # Environment template
 ├── setup_env.py           # Environment setup script
+├── database.py             # Database models and operations
+├── document_processor.py   # PDF processing and embeddings
+├── schema.sql              # Database schema for RAG
 ├── test_hf_router.py      # HF Router API test
+├── test_rag.py            # RAG functionality test
 ├── quick_test.py          # Quick system test
 ├── debug_env.py           # Environment debugging
 ├── test_models.py         # Model testing
@@ -176,6 +194,64 @@ Chat with Mistral model
 ```json
 {
   "response": "Hello! I'm doing well, thank you for asking..."
+}
+```
+
+### POST `/api/ingest/upload`
+Upload and process a PDF document for RAG
+```bash
+curl -X POST -F "file=@sample.pdf" http://localhost:8000/api/ingest/upload
+```
+
+**Response:**
+```json
+{
+  "message": "Document successfully processed and stored",
+  "document_id": 1,
+  "file_name": "sample.pdf",
+  "chunks_processed": 15,
+  "status": "processed"
+}
+```
+
+### POST `/api/ingest/search`
+Search documents using semantic similarity
+```json
+{
+  "query": "What is machine learning?",
+  "limit": 5
+}
+```
+
+**Response:**
+```json
+{
+  "chunks": [
+    {
+      "chunk_text": "Machine learning is a subset of artificial intelligence...",
+      "document_id": 1,
+      "chunk_index": 0,
+      "token_count": 45
+    }
+  ],
+  "total_found": 1
+}
+```
+
+### GET `/api/ingest/documents`
+List all uploaded documents
+```json
+{
+  "documents": [
+    {
+      "id": 1,
+      "file_name": "sample.pdf",
+      "file_size": 1024000,
+      "upload_timestamp": "2024-01-01T00:00:00Z",
+      "status": "processed"
+    }
+  ],
+  "total": 1
 }
 ```
 

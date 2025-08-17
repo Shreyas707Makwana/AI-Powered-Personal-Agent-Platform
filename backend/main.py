@@ -1,11 +1,17 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import os
 import traceback
 from dotenv import load_dotenv
 from openai import OpenAI
+import tempfile
+import shutil
+
+# Import our custom modules
+from database import Document, DocumentChunk, insert_document, update_document_status, insert_document_chunks, search_similar_chunks
+from document_processor import DocumentProcessor, save_uploaded_file
 
 # Load environment variables
 load_dotenv()
@@ -42,6 +48,21 @@ class ChatResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     error: str
+
+class DocumentUploadResponse(BaseModel):
+    message: str
+    document_id: int
+    file_name: str
+    chunks_processed: int
+    status: str
+
+class DocumentSearchRequest(BaseModel):
+    query: str
+    limit: Optional[int] = 5
+
+class DocumentSearchResponse(BaseModel):
+    chunks: List[Dict[str, Any]]
+    total_found: int
 
 @app.get("/", response_model=HealthResponse)
 async def root():
@@ -129,6 +150,133 @@ async def chat_with_mistral(request: ChatRequest):
         print(f"❌ Error type: {type(e).__name__}")
         print(f"❌ Full traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+@app.post("/api/ingest/upload", response_model=DocumentUploadResponse, responses={500: {"model": ErrorResponse}})
+async def upload_document(file: UploadFile = File(...)):
+    """Upload and process a PDF document for RAG"""
+    
+    try:
+        # Validate file type
+        if not file.filename.lower().endswith('.pdf'):
+            raise HTTPException(status_code=400, detail="Only PDF files are supported")
+        
+        # Check file size (limit to 10MB)
+        file.file.seek(0, 2)  # Seek to end
+        file_size = file.file.tell()
+        file.file.seek(0)  # Reset to beginning
+        
+        if file_size > 10 * 1024 * 1024:  # 10MB limit
+            raise HTTPException(status_code=400, detail="File size too large. Maximum size is 10MB")
+        
+        print(f"📄 Processing document: {file.filename} ({file_size} bytes)")
+        
+        # Save file temporarily
+        temp_file_path = save_uploaded_file(file)
+        
+        try:
+            # Initialize document processor
+            processor = DocumentProcessor()
+            
+            # Process document
+            chunks, embeddings = processor.process_document(temp_file_path)
+            
+            print(f"✅ Document processed: {len(chunks)} chunks created")
+            
+            # Insert document into database
+            document_id = await insert_document(file.filename, file_size)
+            
+            # Create document chunks
+            document_chunks = []
+            for i, (chunk_text, embedding) in enumerate(zip(chunks, embeddings)):
+                chunk = DocumentChunk(
+                    document_id=document_id,
+                    chunk_text=chunk_text,
+                    chunk_index=i,
+                    embedding=embedding,
+                    token_count=processor.estimate_token_count(chunk_text)
+                )
+                document_chunks.append(chunk)
+            
+            # Insert chunks into database
+            await insert_document_chunks(document_chunks)
+            
+            # Update document status
+            await update_document_status(document_id, "processed")
+            
+            print(f"✅ Document {document_id} successfully processed and stored")
+            
+            return DocumentUploadResponse(
+                message="Document successfully processed and stored",
+                document_id=document_id,
+                file_name=file.filename,
+                chunks_processed=len(chunks),
+                status="processed"
+            )
+            
+        finally:
+            # Clean up temporary file
+            if os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
+                print(f"🧹 Temporary file cleaned up: {temp_file_path}")
+        
+    except Exception as e:
+        print(f"❌ Error processing document: {str(e)}")
+        print(f"❌ Error type: {type(e).__name__}")
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Error processing document: {str(e)}")
+
+@app.post("/api/ingest/search", response_model=DocumentSearchResponse, responses={500: {"model": ErrorResponse}})
+async def search_documents(request: DocumentSearchRequest):
+    """Search documents using semantic similarity"""
+    
+    try:
+        # Initialize document processor for embedding generation
+        processor = DocumentProcessor()
+        
+        # Generate embedding for the query
+        query_embedding = processor.generate_embeddings([request.query])[0]
+        
+        # Search for similar chunks
+        similar_chunks = await search_similar_chunks(query_embedding, request.limit)
+        
+        # Format response
+        chunks_data = []
+        for chunk in similar_chunks:
+            chunks_data.append({
+                "chunk_text": chunk.chunk_text,
+                "document_id": chunk.document_id,
+                "chunk_index": chunk.chunk_index,
+                "token_count": chunk.token_count
+            })
+        
+        return DocumentSearchResponse(
+            chunks=chunks_data,
+            total_found=len(chunks_data)
+        )
+        
+    except Exception as e:
+        print(f"❌ Error searching documents: {str(e)}")
+        print(f"❌ Error type: {type(e).__name__}")
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Error searching documents: {str(e)}")
+
+@app.get("/api/ingest/documents")
+async def list_documents():
+    """List all uploaded documents"""
+    
+    try:
+        # Get documents from database
+        from database import supabase
+        result = supabase.table("documents").select("*").order("upload_timestamp", desc=True).execute()
+        
+        return {
+            "documents": result.data,
+            "total": len(result.data)
+        }
+        
+    except Exception as e:
+        print(f"❌ Error listing documents: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error listing documents: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
