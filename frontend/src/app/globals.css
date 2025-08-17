@@ -1,26 +1,191 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Dark futuristic color palette */
+  --background: #0a0a0f;
+  --background-secondary: #151520;
+  --background-tertiary: #1a1a2e;
+  --foreground: #e0e0ff;
+  --foreground-secondary: #b8b8d4;
+  --foreground-muted: #8a8aa8;
+  
+  /* Neon accent colors */
+  --neon-blue: #00f0ff;
+  --neon-purple: #9b5cff;
+  --neon-teal: #00ffcc;
+  --neon-pink: #ff00aa;
+  
+  /* Glow effects */
+  --glow-blue: 0 0 20px rgba(0, 240, 255, 0.3);
+  --glow-purple: 0 0 20px rgba(155, 92, 255, 0.3);
+  --glow-teal: 0 0 20px rgba(0, 255, 204, 0.3);
+  --glow-pink: 0 0 20px rgba(255, 0, 170, 0.3);
+  
+  /* Typography */
+  --font-futuristic: 'Orbitron', monospace;
+  --font-body: 'Exo 2', sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Custom theme variables for Tailwind compatibility */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(135deg, var(--background) 0%, var(--background-secondary) 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Futuristic scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+  border-radius: 4px;
+  box-shadow: var(--glow-blue);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, var(--neon-teal), var(--neon-pink));
+  box-shadow: var(--glow-teal);
+}
+
+/* Cyberpunk glow animations */
+@keyframes neon-pulse {
+  0%, 100% { 
+    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+  }
+  50% { 
+    text-shadow: 0 0 2px currentColor, 0 0 5px currentColor, 0 0 8px currentColor;
+  }
+}
+
+@keyframes border-glow {
+  0%, 100% { 
+    box-shadow: 0 0 5px currentColor, inset 0 0 5px rgba(255, 255, 255, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 20px currentColor, inset 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Utility classes for futuristic effects */
+.neon-text-blue {
+  color: var(--neon-blue);
+  text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.neon-text-purple {
+  color: var(--neon-purple);
+  text-shadow: 0 0 10px var(--neon-purple);
+}
+
+.neon-text-teal {
+  color: var(--neon-teal);
+  text-shadow: 0 0 10px var(--neon-teal);
+}
+
+.cyber-border {
+  background: rgba(0, 240, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.cyber-card {
+  background: linear-gradient(145deg, rgba(21, 21, 32, 0.8), rgba(26, 26, 46, 0.6));
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.cyber-button {
+  background: linear-gradient(45deg, rgba(0, 240, 255, 0.1), rgba(155, 92, 255, 0.1));
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: var(--foreground);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-button:hover {
+  background: linear-gradient(45deg, rgba(0, 240, 255, 0.2), rgba(155, 92, 255, 0.2));
+  border-color: var(--neon-blue);
+  box-shadow: var(--glow-blue);
+  transform: translateY(-2px);
+}
+
+.cyber-button:active {
+  transform: translateY(0px);
+}
+
+.cyber-input {
+  background: rgba(21, 21, 32, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  color: var(--foreground);
+  backdrop-filter: blur(10px);
+}
+
+.cyber-input:focus {
+  outline: none;
+  border-color: var(--neon-blue);
+  box-shadow: var(--glow-blue);
+}
+
+.cyber-input::placeholder {
+  color: var(--foreground-muted);
+}
+
+/* Message bubble styles */
+.message-user {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 240, 255, 0.1));
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: var(--glow-blue);
+}
+
+.message-assistant {
+  background: linear-gradient(135deg, rgba(155, 92, 255, 0.2), rgba(0, 255, 204, 0.1));
+  border: 1px solid rgba(155, 92, 255, 0.3);
+  box-shadow: var(--glow-purple);
+}
+
+/* Loading animation */
+.cyber-loading {
+  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4), transparent);
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Fade in animation for messages */
+@keyframes fade-in {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }

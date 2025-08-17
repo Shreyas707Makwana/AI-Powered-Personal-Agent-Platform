@@ -126,127 +126,168 @@ export default function Upload({ onUploaded }: UploadProps) {
   }, []);
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Upload Document</h2>
-      
-      {/* File Drop Zone */}
-      <div
-        className={`border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 cursor-pointer ${
-          file
-            ? 'border-green-300 bg-green-50'
-            : isDragOver
-            ? 'border-blue-400 bg-blue-50'
-            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-        }`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={!file ? openFilePicker : undefined}
-        onKeyDown={!file ? handleKeyDown : undefined}
-        role={!file ? "button" : undefined}
-        tabIndex={!file ? 0 : undefined}
-        aria-label={!file ? "Click to choose a PDF file or drag and drop here" : undefined}
-        style={{ zIndex: 1 }}
-      >
-        {file ? (
-          <div className="space-y-3">
-            <div className="text-green-600">
-              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+    <div className="cyber-card">
+      <div className="p-6">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="w-4 h-4 rounded-full bg-blue-400"></div>
+          <h2 className="text-lg font-bold" style={{color: 'var(--neon-blue)', fontFamily: 'var(--font-futuristic)'}}>
+            DATA UPLOAD
+          </h2>
+        </div>
+        
+        {/* Futuristic File Drop Zone */}
+        <div
+          className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer relative overflow-hidden ${
+            file
+              ? 'border-green-400 bg-green-900 bg-opacity-20'
+              : isDragOver
+              ? 'border-blue-400 bg-blue-900 bg-opacity-20'
+              : 'border-gray-600 hover:border-blue-400 hover:bg-blue-900 hover:bg-opacity-10'
+          }`}
+          style={{
+            borderColor: file 
+              ? 'var(--neon-teal)' 
+              : isDragOver 
+              ? 'var(--neon-blue)' 
+              : 'rgba(0, 240, 255, 0.3)'
+          }}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={!file ? openFilePicker : undefined}
+          onKeyDown={!file ? handleKeyDown : undefined}
+          role={!file ? "button" : undefined}
+          tabIndex={!file ? 0 : undefined}
+          aria-label={!file ? "Click to choose a PDF file or drag and drop here" : undefined}
+        >
+          {file ? (
+            <div className="space-y-4">
+              <div style={{color: 'var(--neon-teal)'}}>
+                <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="space-y-2">
+                <p className="text-base font-semibold break-words" style={{color: 'var(--foreground)', fontFamily: 'var(--font-body)'}}>{file.name}</p>
+                <p className="text-sm" style={{color: 'var(--neon-teal)', fontFamily: 'var(--font-futuristic)'}}>{formatFileSize(file.size)}</p>
+              </div>
+              <button
+                onClick={openFilePicker}
+                disabled={uploading}
+                className="cyber-button px-4 py-2 rounded-lg text-sm disabled:opacity-50 transition-all hover:scale-105"
+                style={{fontFamily: 'var(--font-futuristic)'}}
+              >
+                CHANGE FILE
+              </button>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-900 break-words">{file.name}</p>
-              <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+          ) : (
+            <div className="space-y-4">
+              <div className="relative">
+                <svg className="mx-auto h-16 w-16" style={{color: 'var(--neon-blue)'}} stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="space-y-2">
+                <p className="text-base" style={{color: 'var(--foreground)'}}>
+                  <span className="font-semibold" style={{color: 'var(--neon-blue)', fontFamily: 'var(--font-futuristic)'}}>
+                    DRAG & DROP PDF • CLICK TO SELECT
+                  </span>
+                </p>
+                <p className="text-sm" style={{color: 'var(--foreground-muted)'}}>PDF files only • Maximum 10MB</p>
+              </div>
             </div>
+          )}
+          
+          {/* Animated border effect */}
+          <div className="absolute inset-0 rounded-xl pointer-events-none">
+            <div className="absolute inset-0 rounded-xl border border-transparent animate-pulse"
+                 style={{
+                   background: isDragOver 
+                     ? 'linear-gradient(45deg, transparent, rgba(0, 240, 255, 0.2), transparent)'
+                     : 'none'
+                 }}>
+            </div>
+          </div>
+        </div>
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/pdf,.pdf"
+          onChange={handleFileSelect}
+          className="hidden"
+          aria-label="File input"
+        />
+
+        {/* Action Buttons */}
+        {file && (
+          <div className="mt-6 space-y-3">
             <button
-              onClick={openFilePicker}
+              onClick={handleUpload}
               disabled={uploading}
-              className="text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+              className="w-full cyber-button py-3 px-6 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
+              style={{fontFamily: 'var(--font-futuristic)'}}
             >
-              Change file
+              {uploading ? (
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                  <span>UPLOADING...</span>
+                </div>
+              ) : (
+                'UPLOAD DOCUMENT'
+              )}
+            </button>
+            
+            <button
+              onClick={clearFile}
+              disabled={uploading}
+              className="w-full py-3 px-6 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
+              style={{
+                background: 'rgba(155, 92, 255, 0.1)',
+                border: '1px solid rgba(155, 92, 255, 0.3)',
+                color: 'var(--neon-purple)',
+                fontFamily: 'var(--font-futuristic)'
+              }}
+            >
+              REMOVE FILE
             </button>
           </div>
-        ) : (
-          <div className="space-y-3">
-            <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <div className="space-y-1">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium text-blue-600">
-                  Drag & drop a PDF here, or click to choose
-                </span>
-              </p>
-              <p className="text-xs text-gray-500">PDF files only, up to 10MB</p>
+        )}
+
+        {/* Status Messages */}
+        {error && (
+          <div className="mt-4 p-4 rounded-lg border-2 border-red-500 bg-red-900 bg-opacity-20" aria-live="polite">
+            <div className="flex items-center space-x-3">
+              <svg className="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="text-red-400 text-sm" style={{fontFamily: 'var(--font-futuristic)'}}>
+                ERROR: {error}
+              </span>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/pdf,.pdf"
-        onChange={handleFileSelect}
-        className="hidden"
-        aria-label="File input"
-      />
+        {success && (
+          <div className="mt-4 p-4 rounded-lg border-2 border-green-500 bg-green-900 bg-opacity-20" aria-live="polite">
+            <div className="flex items-center space-x-3">
+              <svg className="w-6 h-6 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="text-green-400 text-sm" style={{fontFamily: 'var(--font-futuristic)'}}>
+                SUCCESS: {success}
+              </span>
+            </div>
+          </div>
+        )}
 
-      {/* Upload Button */}
-      {file && (
-        <div className="mt-4 space-y-3">
-          <button
-            onClick={handleUpload}
-            disabled={uploading}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            {uploading ? (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Uploading...</span>
-              </div>
-            ) : (
-              'Upload Document'
-            )}
-          </button>
-          
-          <button
-            onClick={clearFile}
-            disabled={uploading}
-            className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-          >
-            Remove file
-          </button>
+        {/* System Info */}
+        <div className="mt-6 space-y-2 text-xs" style={{color: 'var(--foreground-muted)'}}>
+          <p>• Documents processed for RAG neural network integration</p>
+          <p>• Text extraction and semantic chunking protocols active</p>
+          <p>• Neural interface ready for document queries</p>
         </div>
-      )}
-
-      {/* Error Display */}
-      {error && (
-        <div 
-          className="mt-3 text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2"
-          aria-live="polite"
-        >
-          {error}
-        </div>
-      )}
-
-      {/* Success Display */}
-      {success && (
-        <div 
-          className="mt-3 text-green-600 text-sm bg-green-50 border border-green-200 rounded px-3 py-2"
-          aria-live="polite"
-        >
-          {success}
-        </div>
-      )}
-
-      {/* Instructions */}
-      <div className="mt-4 text-xs text-gray-500">
-        <p>• Uploaded documents will be processed for RAG capabilities</p>
-        <p>• Text will be extracted and chunked into searchable segments</p>
-        <p>• Use the chat interface to ask questions about your documents</p>
       </div>
     </div>
   );

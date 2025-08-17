@@ -114,60 +114,90 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
 
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
-        <h1 className="text-xl font-semibold text-gray-900">AI Agent Chat</h1>
-        <p className="text-sm text-gray-600">Powered by Mistral-7B with RAG capabilities</p>
+    <div className="flex flex-col h-full" style={{
+      background: 'linear-gradient(145deg, rgba(21, 21, 32, 0.8), rgba(26, 26, 46, 0.6))',
+      backdropFilter: 'blur(15px)',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+    }}>
+      {/* Neural Interface Header */}
+      <div className="p-6">
+        <div className="flex items-center space-x-3">
+          <div className="w-4 h-4 rounded-full bg-purple-400"></div>
+          <h1 className="text-xl font-bold" style={{color: 'var(--neon-purple)', fontFamily: 'var(--font-futuristic)'}}>
+            NEURAL INTERFACE
+          </h1>
+        </div>
+        <p className="text-sm mt-2" style={{color: 'var(--foreground-secondary)'}}>
+          Mistral-7B Core • RAG Protocol {useRag ? 'ACTIVE' : 'STANDBY'}
+        </p>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{background: 'rgba(10, 10, 15, 0.3)'}}>
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            <p>Start a conversation by typing a message below</p>
-            <p className="text-sm mt-2">
-              {useRag ? 'RAG is enabled - responses will include document context' : 'RAG is disabled - general responses only'}
-            </p>
+          <div className="text-center py-12">
+            <div className="cyber-card p-8 max-w-md mx-auto">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" 
+                   style={{background: 'linear-gradient(45deg, var(--neon-blue), var(--neon-purple))'}}>
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <p className="mb-2" style={{color: 'var(--neon-blue)', fontFamily: 'var(--font-futuristic)'}}>
+                NEURAL LINK ESTABLISHED
+              </p>
+              <p className="text-sm" style={{color: 'var(--foreground-muted)'}}>
+                {useRag ? 'RAG Protocol Active - Document context enabled' : 'Standard mode - General AI responses'}
+              </p>
+            </div>
           </div>
         ) : (
           messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
             >
               <div
-                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                className={`max-w-[80%] rounded-xl px-6 py-4 backdrop-filter backdrop-blur-sm ${
                   message.role === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-900'
+                    ? 'message-user text-white'
+                    : 'message-assistant'
                 }`}
+                style={{
+                  color: message.role === 'user' ? '#ffffff' : 'var(--foreground)',
+                  fontFamily: 'var(--font-body)'
+                }}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
                 
                 {/* Citations for assistant messages */}
                 {message.role === 'assistant' && message.citations && message.citations.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    <p className="text-xs font-medium text-gray-600">Sources:</p>
+                  <div className="mt-4 space-y-3">
+                    <p className="text-xs font-semibold" style={{color: 'var(--neon-teal)', fontFamily: 'var(--font-futuristic)'}}>
+                      DATA SOURCES:
+                    </p>
                     {message.citations.map((citation) => (
                       <div
                         key={citation.id}
-                        className="bg-white rounded border p-2 text-xs"
+                        className="cyber-card p-3 text-xs border border-opacity-30"
+                        style={{borderColor: 'var(--neon-teal)'}}
                       >
-                        <p className="text-gray-700 mb-1">
+                        <p className="mb-2 leading-relaxed" style={{color: 'var(--foreground-secondary)'}}>
                           {citation.snippet.length > 200
                             ? `${citation.snippet.substring(0, 200)}...`
                             : citation.snippet}
                         </p>
-                        <div className="flex justify-between items-center text-gray-500">
-                          <span>Similarity: {Math.round(citation.similarity * 100)}%</span>
+                        <div className="flex justify-between items-center">
+                          <span style={{color: 'var(--neon-teal)', fontFamily: 'var(--font-futuristic)'}}>
+                            MATCH: {Math.round(citation.similarity * 100)}%
+                          </span>
                           <a
                             href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ingest/documents/${citation.document_id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-500 hover:underline"
+                            className="cyber-button px-3 py-1 text-xs rounded-md hover:scale-105 transition-transform"
                           >
-                            View Doc
+                            ACCESS
                           </a>
                         </div>
                       </div>
@@ -181,12 +211,15 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
         
         {/* Loading skeleton */}
         {loading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg px-4 py-2 max-w-[80%]">
-              <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div className="flex justify-start animate-fade-in">
+            <div className="message-assistant max-w-[80%] rounded-xl px-6 py-4 backdrop-filter backdrop-blur-sm">
+              <div className="flex space-x-3 items-center">
+                <div className="w-3 h-3 rounded-full animate-bounce" style={{background: 'var(--neon-purple)', boxShadow: 'var(--glow-purple)'}}></div>
+                <div className="w-3 h-3 rounded-full animate-bounce" style={{background: 'var(--neon-blue)', boxShadow: 'var(--glow-blue)', animationDelay: '0.1s'}}></div>
+                <div className="w-3 h-3 rounded-full animate-bounce" style={{background: 'var(--neon-teal)', boxShadow: 'var(--glow-teal)', animationDelay: '0.2s'}}></div>
+                <span className="text-sm" style={{color: 'var(--neon-purple)', fontFamily: 'var(--font-futuristic)'}}>
+                  PROCESSING...
+                </span>
               </div>
             </div>
           </div>
@@ -195,42 +228,42 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="bg-white border-t border-gray-200 p-4">
+      {/* Control Panel */}
+      <div className="p-6">
         {/* RAG Controls */}
-        <div className="mb-3 flex flex-wrap gap-4 items-center text-sm">
-          <label className="flex items-center space-x-2">
+        <div className="mb-4 flex flex-wrap gap-6 items-center text-sm">
+          <label className="flex items-center space-x-3">
             <input
               type="checkbox"
               checked={useRag}
               onChange={(e) => setUseRag(e.target.checked)}
-              className="rounded border-gray-300"
+              className="w-4 h-4 rounded border-2 border-blue-400 bg-transparent checked:bg-blue-500 focus:ring-2 focus:ring-blue-500"
             />
-            <span>Use RAG</span>
+            <span style={{color: 'var(--neon-blue)', fontFamily: 'var(--font-futuristic)'}}>RAG PROTOCOL</span>
           </label>
           
           {useRag && (
             <>
-              <label className="flex items-center space-x-2">
-                <span>Top K:</span>
+              <label className="flex items-center space-x-3">
+                <span style={{color: 'var(--neon-teal)', fontFamily: 'var(--font-futuristic)'}}>TOP-K:</span>
                 <input
                   type="number"
                   min="1"
                   max="10"
                   value={topK}
                   onChange={(e) => setTopK(Number(e.target.value))}
-                  className="w-16 rounded border border-gray-300 px-2 py-1 text-sm"
+                  className="w-16 cyber-input rounded-md px-2 py-1 text-sm text-center"
                 />
               </label>
               
-              <label className="flex items-center space-x-2">
-                <span>Document:</span>
-                                 <select
-                   value={selectedDocId || ''}
-                   onChange={() => onDocumentsRefresh()}
-                   className="rounded border border-gray-300 px-2 py-1 text-sm"
-                 >
-                  <option value="">All Documents</option>
+              <label className="flex items-center space-x-3">
+                <span style={{color: 'var(--neon-purple)', fontFamily: 'var(--font-futuristic)'}}>TARGET:</span>
+                <select
+                  value={selectedDocId || ''}
+                  onChange={() => onDocumentsRefresh()}
+                  className="cyber-input rounded-md px-3 py-1 text-sm"
+                >
+                  <option value="">ALL DOCUMENTS</option>
                   {documents.map((doc) => (
                     <option key={doc.id} value={doc.id}>
                       {doc.file_name}
@@ -244,28 +277,43 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
 
         {/* Error Display */}
         {error && (
-          <div className="mb-3 text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
-            Error: {error}
+          <div className="mb-4 p-3 rounded-lg border-2 border-red-500 bg-red-900 bg-opacity-20">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="text-red-400 text-sm" style={{fontFamily: 'var(--font-futuristic)'}}>
+                ERROR: {error}
+              </span>
+            </div>
           </div>
         )}
 
         {/* Message Input */}
-        <div className="flex space-x-2">
+        <div className="flex space-x-4">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message here..."
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            rows={3}
+            placeholder="Enter neural command..."
+            className="flex-1 cyber-input rounded-xl px-4 py-3 resize-none text-base"
+            style={{minHeight: '60px'}}
             disabled={loading}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="cyber-button px-6 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{fontFamily: 'var(--font-futuristic)'}}
           >
-            {loading ? 'Sending...' : 'Send'}
+            {loading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                <span>TRANSMIT</span>
+              </div>
+            ) : (
+              'TRANSMIT'
+            )}
           </button>
         </div>
       </div>
