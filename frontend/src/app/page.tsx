@@ -90,7 +90,7 @@ export default function Home() {
 
       {/* Main Content with Enhanced Grid Layout */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[calc(100vh-12rem)]">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[calc(100vh-8rem)]">
           {/* Enhanced Left Sidebar - Quantum Control Panel */}
           <div className="lg:col-span-1 space-y-6">
             {/* Sidebar Header */}
@@ -138,71 +138,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Enhanced Futuristic Footer */}
-      <footer className="quantum-card mt-8 relative z-10 border-t-2 border-purple-500/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center">
-            {/* Tech Stack Display */}
-            <div className="flex justify-center items-center space-x-8 mb-4">
-              <div className="tech-badge">
-                <div className="tech-orb bg-blue-500"></div>
-                <span className="text-sm neon-text-cyan font-mono">NEXT.JS</span>
-              </div>
-              <div className="tech-badge">
-                <div className="tech-orb bg-purple-500"></div>
-                <span className="text-sm neon-text-purple font-mono">FASTAPI</span>
-              </div>
-              <div className="tech-badge">
-                <div className="tech-orb bg-teal-500"></div>
-                <span className="text-sm neon-text-gradient font-mono">MISTRAL-7B</span>
-              </div>
-            </div>
-            
-            {/* Main Footer Text */}
-            <p className="text-sm neon-text-gradient font-bold tracking-wider mb-2" 
-               style={{fontFamily: 'var(--font-futuristic)'}}>
-              QUANTUM NEURAL NETWORK ARCHITECTURE
-            </p>
-            
-            {/* Sub Information */}
-            <div className="flex justify-center items-center space-x-6 text-xs font-mono text-gray-500">
-              <span className="flex items-center">
-                <div className="w-2 h-2 bg-cyan-400 rounded-full mr-2 animate-pulse"></div>
-                ADVANCED DOCUMENT PROCESSING
-              </span>
-              <span>•</span>
-              <span className="flex items-center">
-                <div className="w-2 h-2 bg-purple-400 rounded-full mr-2 animate-pulse"></div>
-                RETRIEVAL AUGMENTED GENERATION
-              </span>
-              <span>•</span>
-              <span className="flex items-center">
-                <div className="w-2 h-2 bg-teal-400 rounded-full mr-2 animate-pulse"></div>
-                QUANTUM-READY INFRASTRUCTURE
-              </span>
-            </div>
-            
-            {/* Quantum Signature */}
-            <div className="mt-4 pt-4 border-t border-gray-800">
-              <div className="flex justify-center items-center space-x-4">
-                <div className="quantum-signature">
-                  <div className="signature-line"></div>
-                  <div className="signature-pulse"></div>
-                  <div className="signature-line"></div>
-                </div>
-                <span className="text-xs text-gray-400 font-mono tracking-widest">
-                  POWERED BY QUANTUM INTELLIGENCE
-                </span>
-                <div className="quantum-signature reverse">
-                  <div className="signature-line"></div>
-                  <div className="signature-pulse"></div>
-                  <div className="signature-line"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
