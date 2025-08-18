@@ -131,9 +131,9 @@ export default function DocumentsList({ selectedDocId, onDocumentSelect, onRefre
 
         {/* Documents Grid */}
         {!loading && documents.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex flex-col items-center justify-center py-8">
             <div className="text-center">
-              <div className="empty-archive-icon mx-auto mb-6">
+              <div className="empty-archive-icon mx-auto mb-6 flex items-center justify-center">
                 <svg className="w-20 h-20" fill="none" stroke="url(#emptyGradient)" viewBox="0 0 24 24">
                   <defs>
                     <linearGradient id="emptyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -145,10 +145,12 @@ export default function DocumentsList({ selectedDocId, onDocumentSelect, onRefre
                         d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold mb-2 neon-text-purple">ARCHIVE EMPTY</h3>
-              <p className="text-sm text-gray-400">
-                Upload documents to initialize<br />quantum knowledge base
-              </p>
+              <div className="flex flex-col items-center">
+                <h3 className="text-lg font-bold mb-2 neon-text-purple text-center">ARCHIVE EMPTY</h3>
+                <p className="text-sm text-gray-400 text-center">
+                  Upload documents to initialize<br />quantum knowledge base
+                </p>
+              </div>
             </div>
           </div>
         ) : (

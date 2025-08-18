@@ -329,7 +329,7 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Enter quantum command sequence..."
+              placeholder="Enter command.."
               className="quantum-textarea w-full"
               rows={2}
               disabled={loading}

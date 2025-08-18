@@ -24,6 +24,7 @@ class Document(BaseModel):
     file_size: int
     upload_timestamp: datetime
     status: str = "processed"
+    owner: Optional[str] = None  # UUID of the owner user
 
 class DocumentChunk(BaseModel):
     id: Optional[int] = None
@@ -32,15 +33,17 @@ class DocumentChunk(BaseModel):
     chunk_index: int
     embedding: List[float]
     token_count: int
+    owner: Optional[str] = None  # UUID of the owner user
 
 # Database operations
-async def insert_document(file_name: str, file_size: int) -> int:
+async def insert_document(file_name: str, file_size: int, owner_id: Optional[str] = None) -> int:
     """Insert a new document and return its ID"""
     data = {
         "file_name": file_name,
         "file_size": file_size,
         "upload_timestamp": datetime.utcnow().isoformat(),
-        "status": "processing"
+        "status": "processing",
+        "owner": owner_id
     }
     
     result = supabase.table("documents").insert(data).execute()

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
@@ -13,6 +13,7 @@ import shutil
 from database import Document, DocumentChunk, insert_document, update_document_status, insert_document_chunks
 from document_processor import DocumentProcessor, save_uploaded_file
 from rag_search import search_similar_chunks, embed_text, ping_embedding_model, ping_database
+from auth import optional_auth_dependency, required_auth_dependency
 
 # Load environment variables
 load_dotenv()
@@ -99,7 +100,7 @@ async def api_status() -> Dict[str, Any]:
     }
 
 @app.post("/api/llm/chat", response_model=ChatResponse, responses={500: {"model": ErrorResponse}})
-async def chat_with_mistral(request: ChatRequest):
+async def chat_with_mistral(request: ChatRequest, user: Dict[str, Any] = Depends(required_auth_dependency)):
     """Chat with Mistral-7B-Instruct model via Hugging Face Router API with optional RAG"""
     
     try:
@@ -137,13 +138,15 @@ async def chat_with_mistral(request: ChatRequest):
             try:
                 print("🔍 Searching for relevant document chunks...")
                 
-                # Search for similar chunks
+                # Search for similar chunks (scoped to user if authenticated)
                 similar_chunks = await search_similar_chunks(
                     query=question, 
                     top_k=request.top_k, 
-                    document_id=request.document_id
+                    document_id=request.document_id,
+                    user_id=user["id"]
                 )
-                
+                print(f"✅ Found {len(similar_chunks)} chunks for user {user['email']}")
+
                 if similar_chunks:
                     print(f"✅ Found {len(similar_chunks)} relevant chunks")
                     
@@ -216,7 +219,7 @@ async def chat_with_mistral(request: ChatRequest):
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 @app.post("/api/ingest/upload", response_model=DocumentUploadResponse, responses={500: {"model": ErrorResponse}})
-async def upload_document(file: UploadFile = File(...)):
+async def upload_document(file: UploadFile = File(...), user: Dict[str, Any] = Depends(required_auth_dependency)):
     """Upload and process a PDF document for RAG"""
     
     try:
@@ -246,8 +249,9 @@ async def upload_document(file: UploadFile = File(...)):
             
             print(f"✅ Document processed: {len(chunks)} chunks created")
             
-            # Insert document into database
-            document_id = await insert_document(file.filename, file_size)
+            # Insert document into database with owner
+            document_id = await insert_document(file.filename, file_size, owner_id=user["id"])
+            print(f"✅ Document saved with owner ID: {user['id']} for user: {user['email']}")
             
             # Create document chunks
             document_chunks = []
@@ -257,7 +261,8 @@ async def upload_document(file: UploadFile = File(...)):
                     chunk_text=chunk_text,
                     chunk_index=i,
                     embedding=embedding,
-                    token_count=processor.estimate_token_count(chunk_text)
+                    token_count=processor.estimate_token_count(chunk_text),
+                    owner=user["id"]
                 )
                 document_chunks.append(chunk)
             
@@ -325,13 +330,20 @@ async def search_documents(request: DocumentSearchRequest):
         raise HTTPException(status_code=500, detail=f"Error searching documents: {str(e)}")
 
 @app.get("/api/ingest/documents")
-async def list_documents():
+async def list_documents(user: Dict[str, Any] = Depends(required_auth_dependency)):
     """List all uploaded documents"""
     
     try:
-        # Get documents from database
+        # Get documents from database (scoped to user if authenticated)
         from database import supabase
-        result = supabase.table("documents").select("*").order("upload_timestamp", desc=True).execute()
+        
+        query = supabase.table("documents").select("*")
+        
+        # Return only user's documents (authentication is required)
+        query = query.eq("owner", user["id"])
+        print(f"✅ Listing documents for user: {user['email']} (ID: {user['id']})")
+            
+        result = query.order("upload_timestamp", desc=True).execute()
         
         return {
             "documents": result.data,
@@ -341,6 +353,15 @@ async def list_documents():
     except Exception as e:
         print(f"❌ Error listing documents: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error listing documents: {str(e)}")
+
+@app.get("/api/me")
+async def get_current_user_profile(user: Dict[str, Any] = Depends(required_auth_dependency)):
+    """Get current user profile information - requires authentication"""
+    
+    return {
+        "id": user["id"],
+        "email": user["email"]
+    }
 
 @app.get("/api/rag/ping")
 async def rag_ping():

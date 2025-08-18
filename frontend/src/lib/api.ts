@@ -2,6 +2,47 @@
  * API functions for communicating with the AI Agent Platform backend
  */
 
+import { supabase } from './supabaseClient';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+
+// Helper function to get auth headers - REQUIRED for all requests
+async function getAuthHeaders(): Promise<HeadersInit> {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session?.access_token) {
+    // Redirect to login if no token
+    window.location.href = '/login';
+    throw new Error('Authentication required');
+  }
+  
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${session.access_token}`,
+  };
+}
+
+// Helper function to make authenticated requests - ALL requests require auth
+async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const headers = await getAuthHeaders();
+  
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...headers,
+      ...options.headers,
+    },
+  });
+
+  // Handle 401 responses by redirecting to login
+  if (response.status === 401) {
+    window.location.href = '/login';
+    throw new Error('Authentication expired');
+  }
+
+  return response;
+}
+
 export interface Document {
   id: number;
   file_name: string;
@@ -44,9 +85,14 @@ export interface UploadResponse {
 
 /**
  * Fetch all uploaded documents from the backend
+ * Returns user's documents if authenticated, or public documents if not
  */
 export async function fetchDocuments(): Promise<Document[]> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ingest/documents`);
+  const authHeaders = await getAuthHeaders();
+  
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ingest/documents`, {
+    headers: authHeaders
+  });
   
   if (!response.ok) {
     throw new Error(`Failed to fetch documents: ${response.status} ${response.statusText}`);
@@ -58,13 +104,25 @@ export async function fetchDocuments(): Promise<Document[]> {
 
 /**
  * Upload a PDF document to the backend for RAG processing
+ * Associates with current user if authenticated
  */
 export async function uploadDocument(file: File): Promise<UploadResponse> {
   const formData = new FormData();
   formData.append('file', file);
   
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session?.access_token) {
+    window.location.href = '/login';
+    throw new Error('Authentication required');
+  }
+  
+  // For file uploads, don't set Content-Type - let browser set multipart/form-data
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ingest/upload`, {
     method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+    },
     body: formData,
   });
   
@@ -77,6 +135,7 @@ export async function uploadDocument(file: File): Promise<UploadResponse> {
 
 /**
  * Send a chat message to the AI model with optional RAG support
+ * Uses user's documents for RAG if authenticated
  */
 export async function sendChat(
   messages: ChatMessage[], 
@@ -84,10 +143,13 @@ export async function sendChat(
 ): Promise<ChatResponse> {
   const { use_rag = false, top_k = 4, document_id = null } = options;
   
+  const authHeaders = await getAuthHeaders();
+  
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/llm/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...authHeaders
     },
     body: JSON.stringify({
       messages,
@@ -99,6 +161,27 @@ export async function sendChat(
   
   if (!response.ok) {
     throw new Error(`Failed to send chat: ${response.status} ${response.statusText}`);
+  }
+  
+  return await response.json();
+}
+
+/**
+ * Get current user profile information
+ */
+export async function getCurrentUserProfile() {
+  const authHeaders = await getAuthHeaders();
+  
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/me`, {
+    headers: authHeaders
+  });
+  
+  if (response.status === 204) {
+    return null; // Not authenticated
+  }
+  
+  if (!response.ok) {
+    throw new Error(`Failed to get user profile: ${response.status} ${response.statusText}`);
   }
   
   return await response.json();
