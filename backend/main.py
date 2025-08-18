@@ -384,4 +384,11 @@ async def rag_ping():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import os
+
+    # Use the PORT environment variable provided by Render (or default to 8000 for local dev)
+    port = int(os.environ.get("PORT", 8000))
+
+    # Disable reload in production environments
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+
