@@ -197,3 +197,27 @@ Thumbs.db
 # Hugging Face specific
 .huggingface/
 .cache/huggingface/
+
+# Uploaded files and documents
+uploads/
+documents/
+*.pdf
+*.doc
+*.docx
+*.txt
+
+# Test files
+test_*.py
+*_test.py
+sample.*
+quick_test.*
+debug_*
+setup_and_test.*
+test_curl.*
+
+# Batch files
+*.bat
+
+# Allow tracked tests inside backend/tests/
+!tests/
+!tests/**/*.py

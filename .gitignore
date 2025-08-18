@@ -1,0 +1,65 @@
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env*.local
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+env/
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Test files
+test_*.py
+*_test.py
+sample.*
+debug_*
+*.bat
+
+# Allow tracked tests inside backend/tests/
+!backend/tests/
+!backend/tests/**/*.py
+
+# Uploads
+uploads/
+documents/
+*.pdf
+*.doc
+*.docx
+
+# Cache
+.cache/
+.huggingface/
+
+# Deployment
+.vercel
