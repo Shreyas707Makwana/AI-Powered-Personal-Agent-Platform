@@ -4,10 +4,22 @@ services:
     env: python
     rootDir: backend
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    startCommand: "python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: PORT
-        value: 8000
-    healthCheckPath: /health
+      - key: ENV
+        value: production
+      # The following should be set in Render Dashboard → Environment Variables
+      # or added here if you want to track them in git (not recommended for secrets):
+      # - key: SUPABASE_URL
+      #   value: https://<your-project>.supabase.co
+      # - key: SUPABASE_KEY
+      #   value: <your-service-role-key>
+      # - key: DATABASE_URL
+      #   value: postgresql://...
+      # - key: HF_API_KEY
+      #   value: <your-hf-api-key>
+      # - key: EMBEDDING_MODEL
+      #   value: sentence-transformers/all-MiniLM-L6-v2
