@@ -40,10 +40,8 @@ export default function DocumentsList({ selectedDocId, onDocumentSelect, onRefre
   const handleDocumentClick = (docId: number) => {
     const docIdString = docId.toString();
     if (selectedDocId === docIdString) {
-      // Deselect if already selected
       onDocumentSelect(null);
     } else {
-      // Select the document
       onDocumentSelect(docIdString);
     }
   };
@@ -66,147 +64,171 @@ export default function DocumentsList({ selectedDocId, onDocumentSelect, onRefre
     });
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusIndicator = (status: string) => {
     switch (status) {
       case 'processed':
-        return 'bg-green-900 bg-opacity-30 text-green-400 border-green-400';
+        return { color: 'emerald', icon: '✓', label: 'SYNCED' };
       case 'processing':
-        return 'bg-yellow-900 bg-opacity-30 text-yellow-400 border-yellow-400';
+        return { color: 'amber', icon: '◈', label: 'INDEXING' };
       case 'error':
-        return 'bg-red-900 bg-opacity-30 text-red-400 border-red-400';
+        return { color: 'red', icon: '⚠', label: 'FAILED' };
       default:
-        return 'bg-gray-900 bg-opacity-30 text-gray-400 border-gray-400';
+        return { color: 'gray', icon: '○', label: 'UNKNOWN' };
     }
   };
 
   return (
-    <div className="cyber-card">
-      <div className="p-6">
+    <div className="quantum-card h-full flex flex-col">
+      <div className="p-6 flex-1 flex flex-col">
+        {/* Header with Refresh */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-4 h-4 rounded-full bg-purple-400"></div>
-            <h2 className="text-lg font-bold" style={{color: 'var(--neon-purple)', fontFamily: 'var(--font-futuristic)'}}>
-              DATA ARCHIVE
-            </h2>
+          <div>
+            <div className="flex items-center space-x-3 mb-2">
+              <div className="data-orb"></div>
+              <h2 className="text-lg font-bold neon-text-purple tracking-wider">
+                QUANTUM DATA ARCHIVE
+              </h2>
+            </div>
+            <p className="text-xs text-gray-500 font-mono">
+              {documents.length} DOCUMENTS • {documents.filter(d => d.status === 'processed').length} INDEXED
+            </p>
           </div>
           <button
             onClick={handleRefresh}
             disabled={loading}
-            className="cyber-button p-2 rounded-lg disabled:opacity-50 transition-all hover:scale-110"
-            title="Refresh neural archive"
+            className="refresh-button group"
+            title="Resync quantum archive"
           >
-            <svg className="w-5 h-5" style={{color: 'var(--neon-teal)'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <svg className={`w-5 h-5 ${loading ? 'animate-spin' : 'group-hover:rotate-180'} transition-transform duration-500`} 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="text-center py-8">
-            <div className="cyber-card p-6 max-w-xs mx-auto">
-              <div className="flex items-center justify-center space-x-3 mb-3">
-                <div className="w-6 h-6 rounded-full bg-blue-400 animate-spin"></div>
-                <span style={{color: 'var(--neon-blue)', fontFamily: 'var(--font-futuristic)'}}>SCANNING NEURAL ARCHIVE...</span>
-              </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="archive-scanner mx-auto mb-4"></div>
+              <p className="text-sm text-cyan-400 font-mono animate-pulse">
+                SCANNING QUANTUM ARCHIVE...
+              </p>
             </div>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="mb-4 p-4 rounded-lg border-2 border-red-500 bg-red-900 bg-opacity-20">
+          <div className="error-alert mb-4">
             <div className="flex items-center space-x-3">
-              <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <span className="text-red-400 text-sm" style={{fontFamily: 'var(--font-futuristic)'}}>
-                ARCHIVE ERROR: {error}
-              </span>
+              <div className="error-icon-pulse"></div>
+              <span className="text-sm font-mono">ARCHIVE ERROR: {error}</span>
             </div>
           </div>
         )}
 
-        {/* Documents List */}
+        {/* Documents Grid */}
         {!loading && documents.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="cyber-card p-8 max-w-sm mx-auto">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" 
-                   style={{background: 'linear-gradient(45deg, var(--neon-purple), var(--neon-teal))'}}>
-                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="empty-archive-icon mx-auto mb-6">
+                <svg className="w-20 h-20" fill="none" stroke="url(#emptyGradient)" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="emptyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#9b5cff" />
+                      <stop offset="100%" stopColor="#00ffcc" />
+                    </linearGradient>
+                  </defs>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                 </svg>
               </div>
-              <p className="mb-2" style={{color: 'var(--neon-purple)', fontFamily: 'var(--font-futuristic)'}}>
-                ARCHIVE EMPTY
-              </p>
-              <p className="text-sm" style={{color: 'var(--foreground-muted)'}}>
-                Upload documents to initialize RAG protocol
+              <h3 className="text-lg font-bold mb-2 neon-text-purple">ARCHIVE EMPTY</h3>
+              <p className="text-sm text-gray-400">
+                Upload documents to initialize<br />quantum knowledge base
               </p>
             </div>
           </div>
         ) : (
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {documents.map((doc) => (
-              <div
-                key={doc.id}
-                onClick={() => handleDocumentClick(doc.id)}
-                className={`cyber-card p-4 cursor-pointer transition-all duration-300 hover:scale-105 ${
-                  selectedDocId === doc.id.toString()
-                    ? 'border-2 border-blue-400 bg-blue-900 bg-opacity-20'
-                    : 'hover:border-blue-400 hover:bg-blue-900 hover:bg-opacity-10'
-                }`}
-                style={{
-                  borderColor: selectedDocId === doc.id.toString() ? 'var(--neon-blue)' : undefined,
-                  boxShadow: selectedDocId === doc.id.toString() ? 'var(--glow-blue)' : undefined
-                }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <svg className="w-5 h-5 flex-shrink-0" style={{color: 'var(--neon-teal)'}} fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-sm font-semibold truncate" 
-                         style={{color: 'var(--foreground)', fontFamily: 'var(--font-body)'}} 
-                         title={doc.file_name}>
-                        {doc.file_name}
-                      </p>
+          <div className="flex-1 overflow-y-auto space-y-3 scrollbar-thin">
+            {documents.map((doc) => {
+              const status = getStatusIndicator(doc.status);
+              const isSelected = selectedDocId === doc.id.toString();
+              
+              return (
+                <div
+                  key={doc.id}
+                  onClick={() => handleDocumentClick(doc.id)}
+                  className={`document-card ${isSelected ? 'document-selected' : ''}`}
+                >
+                  <div className="flex items-start space-x-3">
+                    {/* Document Icon with Status */}
+                    <div className="relative flex-shrink-0">
+                      <div className="document-icon">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" 
+                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" 
+                                clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className={`status-dot status-${status.color}`}>
+                        <span>{status.icon}</span>
+                      </div>
                     </div>
                     
-                    <div className="flex items-center space-x-4 text-xs" style={{color: 'var(--foreground-muted)'}}>
-                      <span>{formatFileSize(doc.file_size)}</span>
-                      <span>•</span>
-                      <span>{formatDate(doc.upload_timestamp)}</span>
+                    {/* Document Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-gray-100 truncate mb-1" title={doc.file_name}>
+                        {doc.file_name}
+                      </p>
+                      <div className="flex items-center space-x-3 text-xs text-gray-500 font-mono">
+                        <span>{formatFileSize(doc.file_size)}</span>
+                        <span>•</span>
+                        <span>{formatDate(doc.upload_timestamp)}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Status Badge */}
+                    <div className="flex-shrink-0">
+                      <span className={`status-badge status-badge-${status.color}`}>
+                        {status.label}
+                      </span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-3 ml-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(doc.status)}`}
-                          style={{fontFamily: 'var(--font-futuristic)'}}>
-                      {doc.status.toUpperCase()}
-                    </span>
-                    {selectedDocId === doc.id.toString() && (
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center"
-                           style={{background: 'rgba(0, 240, 255, 0.2)', color: 'var(--neon-blue)'}}>
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
+                  {/* Selection Indicator */}
+                  {isSelected && (
+                    <div className="selection-indicator mt-3">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/50 to-transparent"></div>
+                        <span className="text-xs text-cyan-400 font-mono">ACTIVE TARGET</span>
+                        <div className="flex-1 h-px bg-gradient-to-l from-cyan-500/50 to-transparent"></div>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
-        {/* System Instructions */}
-        <div className="mt-6 space-y-2 text-xs" style={{color: 'var(--foreground-muted)'}}>
-          <p>• Select documents for targeted RAG queries</p>
-          <p>• Active selections highlighted with neural glow</p>
-          <p>• Archive automatically syncs with neural interface</p>
-        </div>
+        {/* Footer Info */}
+        {!loading && documents.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-gray-800">
+            <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span className="text-gray-500">NEURAL SYNC ACTIVE</span>
+              </div>
+              <div className="flex items-center space-x-2 justify-end">
+                <span className="text-gray-500">VECTOR DB: READY</span>
+                <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

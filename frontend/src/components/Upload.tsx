@@ -15,7 +15,6 @@ export default function Upload({ onUploaded }: UploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Debounced file validation and setting
   const validateAndSetFile = useCallback((selectedFile: File | null) => {
     if (!selectedFile) {
       setFile(null);
@@ -24,11 +23,8 @@ export default function Upload({ onUploaded }: UploadProps) {
       return;
     }
 
-    // Check file extension
     const fileName = selectedFile.name.toLowerCase();
     const isPdfExtension = fileName.endsWith('.pdf');
-    
-    // Check MIME type
     const isPdfMime = selectedFile.type === 'application/pdf';
     
     if (isPdfExtension && isPdfMime) {
@@ -36,7 +32,7 @@ export default function Upload({ onUploaded }: UploadProps) {
       setError(null);
       setSuccess(null);
     } else {
-      setError('Please select a valid PDF file. Only .pdf files are accepted.');
+      setError('Invalid file format. Only PDF documents accepted.');
       setFile(null);
     }
   }, []);
@@ -87,19 +83,16 @@ export default function Upload({ onUploaded }: UploadProps) {
     try {
       const response = await uploadDocument(file);
       setSuccess(
-        `Document "${response.file_name}" uploaded successfully! ${response.chunks_processed} chunks processed.`
+        `"${response.file_name}" successfully integrated • ${response.chunks_processed} vectors generated`
       );
       setFile(null);
       
-      // Clear file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
       
-      // Trigger callback to refresh documents list
       onUploaded();
       
-      // Clear success message after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
@@ -126,31 +119,22 @@ export default function Upload({ onUploaded }: UploadProps) {
   }, []);
 
   return (
-    <div className="cyber-card">
+    <div className="quantum-card">
       <div className="p-6">
+        {/* Header */}
         <div className="flex items-center space-x-3 mb-6">
-          <div className="w-4 h-4 rounded-full bg-blue-400"></div>
-          <h2 className="text-lg font-bold" style={{color: 'var(--neon-blue)', fontFamily: 'var(--font-futuristic)'}}>
-            DATA UPLOAD
-          </h2>
+          <div className="upload-orb"></div>
+          <div>
+            <h2 className="text-lg font-bold neon-text-cyan tracking-wider">
+              QUANTUM UPLINK
+            </h2>
+            <p className="text-xs text-gray-500 font-mono mt-1">PDF DOCUMENT INGESTION</p>
+          </div>
         </div>
         
-        {/* Futuristic File Drop Zone */}
+        {/* Futuristic Drop Zone */}
         <div
-          className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer relative overflow-hidden ${
-            file
-              ? 'border-green-400 bg-green-900 bg-opacity-20'
-              : isDragOver
-              ? 'border-blue-400 bg-blue-900 bg-opacity-20'
-              : 'border-gray-600 hover:border-blue-400 hover:bg-blue-900 hover:bg-opacity-10'
-          }`}
-          style={{
-            borderColor: file 
-              ? 'var(--neon-teal)' 
-              : isDragOver 
-              ? 'var(--neon-blue)' 
-              : 'rgba(0, 240, 255, 0.3)'
-          }}
+          className={`upload-zone ${file ? 'has-file' : ''} ${isDragOver ? 'drag-over' : ''}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -160,54 +144,85 @@ export default function Upload({ onUploaded }: UploadProps) {
           tabIndex={!file ? 0 : undefined}
           aria-label={!file ? "Click to choose a PDF file or drag and drop here" : undefined}
         >
-          {file ? (
-            <div className="space-y-4">
-              <div style={{color: 'var(--neon-teal)'}}>
-                <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="space-y-2">
-                <p className="text-base font-semibold break-words" style={{color: 'var(--foreground)', fontFamily: 'var(--font-body)'}}>{file.name}</p>
-                <p className="text-sm" style={{color: 'var(--neon-teal)', fontFamily: 'var(--font-futuristic)'}}>{formatFileSize(file.size)}</p>
-              </div>
-              <button
-                onClick={openFilePicker}
-                disabled={uploading}
-                className="cyber-button px-4 py-2 rounded-lg text-sm disabled:opacity-50 transition-all hover:scale-105"
-                style={{fontFamily: 'var(--font-futuristic)'}}
-              >
-                CHANGE FILE
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="relative">
-                <svg className="mx-auto h-16 w-16" style={{color: 'var(--neon-blue)'}} stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <div className="space-y-2">
-                <p className="text-base" style={{color: 'var(--foreground)'}}>
-                  <span className="font-semibold" style={{color: 'var(--neon-blue)', fontFamily: 'var(--font-futuristic)'}}>
-                    DRAG & DROP PDF • CLICK TO SELECT
-                  </span>
-                </p>
-                <p className="text-sm" style={{color: 'var(--foreground-muted)'}}>PDF files only • Maximum 10MB</p>
-              </div>
-            </div>
-          )}
-          
-          {/* Animated border effect */}
-          <div className="absolute inset-0 rounded-xl pointer-events-none">
-            <div className="absolute inset-0 rounded-xl border border-transparent animate-pulse"
-                 style={{
-                   background: isDragOver 
-                     ? 'linear-gradient(45deg, transparent, rgba(0, 240, 255, 0.2), transparent)'
-                     : 'none'
-                 }}>
-            </div>
+          <div className="upload-zone-content">
+            {file ? (
+              <>
+                <div className="file-preview">
+                  <div className="file-icon-large">
+                    <svg className="w-16 h-16" fill="none" stroke="url(#fileGradient)" viewBox="0 0 24 24">
+                      <defs>
+                        <linearGradient id="fileGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#00ffcc" />
+                          <stop offset="100%" stopColor="#00f0ff" />
+                        </linearGradient>
+                      </defs>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <div className="file-success-indicator">
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-2 text-center">
+                    <p className="text-base font-medium text-gray-100 break-words px-4">{file.name}</p>
+                    <p className="text-sm text-cyan-400 font-mono">{formatFileSize(file.size)}</p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openFilePicker();
+                    }}
+                    disabled={uploading}
+                    className="change-file-button mt-4"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    REPLACE FILE
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="upload-icon-container">
+                  <div className="upload-icon-bg"></div>
+                  <svg className="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <div className="mt-6 space-y-3 text-center">
+                  <div>
+                    <p className="text-lg font-bold neon-text-gradient">
+                      DRAG & DROP FILE
+                    </p>
+                    <p className="text-sm text-gray-400 mt-1">or click to browse</p>
+                  </div>
+                  <div className="flex items-center justify-center space-x-4 text-xs font-mono text-gray-500">
+                    <span className="flex items-center">
+                      <svg className="w-4 h-4 mr-1 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      PDF FORMAT
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center">
+                      <svg className="w-4 h-4 mr-1 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      MAX 10MB
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
+          
+          {/* Animated Border Effect */}
+          <div className="upload-zone-border"></div>
         </div>
 
         {/* Hidden file input */}
@@ -222,71 +237,71 @@ export default function Upload({ onUploaded }: UploadProps) {
 
         {/* Action Buttons */}
         {file && (
-          <div className="mt-6 space-y-3">
-            <button
-              onClick={handleUpload}
-              disabled={uploading}
-              className="w-full cyber-button py-3 px-6 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
-              style={{fontFamily: 'var(--font-futuristic)'}}
-            >
-              {uploading ? (
-                <div className="flex items-center justify-center space-x-3">
-                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                  <span>UPLOADING...</span>
-                </div>
-              ) : (
-                'UPLOAD DOCUMENT'
-              )}
-            </button>
-            
+          <div className="mt-6 grid grid-cols-2 gap-3">
             <button
               onClick={clearFile}
               disabled={uploading}
-              className="w-full py-3 px-6 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
-              style={{
-                background: 'rgba(155, 92, 255, 0.1)',
-                border: '1px solid rgba(155, 92, 255, 0.3)',
-                color: 'var(--neon-purple)',
-                fontFamily: 'var(--font-futuristic)'
-              }}
+              className="quantum-button-secondary"
             >
-              REMOVE FILE
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              REMOVE
+            </button>
+            <button
+              onClick={handleUpload}
+              disabled={uploading}
+              className="quantum-button-primary"
+            >
+              {uploading ? (
+                <>
+                  <div className="upload-progress"></div>
+                  <span>UPLOADING...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 11l3 3m0 0l3-3m-3 3V8" />
+                  </svg>
+                  INITIALIZE UPLOAD
+                </>
+              )}
             </button>
           </div>
         )}
 
         {/* Status Messages */}
         {error && (
-          <div className="mt-4 p-4 rounded-lg border-2 border-red-500 bg-red-900 bg-opacity-20" aria-live="polite">
+          <div className="error-alert mt-4" aria-live="polite">
             <div className="flex items-center space-x-3">
-              <svg className="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <span className="text-red-400 text-sm" style={{fontFamily: 'var(--font-futuristic)'}}>
-                ERROR: {error}
-              </span>
+              <div className="error-icon-pulse"></div>
+              <span className="text-sm font-mono">ERROR: {error}</span>
             </div>
           </div>
         )}
 
         {success && (
-          <div className="mt-4 p-4 rounded-lg border-2 border-green-500 bg-green-900 bg-opacity-20" aria-live="polite">
+          <div className="success-alert mt-4" aria-live="polite">
             <div className="flex items-center space-x-3">
-              <svg className="w-6 h-6 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span className="text-green-400 text-sm" style={{fontFamily: 'var(--font-futuristic)'}}>
-                SUCCESS: {success}
-              </span>
+              <div className="success-icon-pulse"></div>
+              <span className="text-sm font-mono text-emerald-400">SUCCESS: {success}</span>
             </div>
           </div>
         )}
 
         {/* System Info */}
-        <div className="mt-6 space-y-2 text-xs" style={{color: 'var(--foreground-muted)'}}>
-          <p>• Documents processed for RAG neural network integration</p>
-          <p>• Text extraction and semantic chunking protocols active</p>
-          <p>• Neural interface ready for document queries</p>
+        <div className="mt-6 pt-4 border-t border-gray-800">
+          <div className="grid grid-cols-2 gap-3 text-xs font-mono text-gray-500">
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse mr-2"></div>
+              <span>VECTOR PROCESSING</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-cyan-500 mr-2"></div>
+              <span>SEMANTIC CHUNKING</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

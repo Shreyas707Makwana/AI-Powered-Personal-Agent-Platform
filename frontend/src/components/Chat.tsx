@@ -111,208 +111,249 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
     }
   };
 
-
-
   return (
-    <div className="flex flex-col h-full" style={{
-      background: 'linear-gradient(145deg, rgba(21, 21, 32, 0.8), rgba(26, 26, 46, 0.6))',
-      backdropFilter: 'blur(15px)',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
-    }}>
-      {/* Neural Interface Header */}
-      <div className="p-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-4 h-4 rounded-full bg-purple-400"></div>
-          <h1 className="text-xl font-bold" style={{color: 'var(--neon-purple)', fontFamily: 'var(--font-futuristic)'}}>
-            NEURAL INTERFACE
-          </h1>
-        </div>
-        <p className="text-sm mt-2" style={{color: 'var(--foreground-secondary)'}}>
-          Mistral-7B Core • RAG Protocol {useRag ? 'ACTIVE' : 'STANDBY'}
-        </p>
-      </div>
-
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{background: 'rgba(10, 10, 15, 0.3)'}}>
-        {messages.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="cyber-card p-8 max-w-md mx-auto">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" 
-                   style={{background: 'linear-gradient(45deg, var(--neon-blue), var(--neon-purple))'}}>
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+    <div className="flex flex-col h-full quantum-card overflow-hidden">
+      {/* Neural Interface Header with Holographic Effect */}
+      <div className="neural-header p-6 relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 animate-gradient-shift"></div>
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="quantum-orb"></div>
+                <h1 className="text-2xl font-bold neon-text-gradient tracking-wider">
+                  QUANTUM NEURAL INTERFACE
+                </h1>
               </div>
-              <p className="mb-2" style={{color: 'var(--neon-blue)', fontFamily: 'var(--font-futuristic)'}}>
-                NEURAL LINK ESTABLISHED
-              </p>
-              <p className="text-sm" style={{color: 'var(--foreground-muted)'}}>
-                {useRag ? 'RAG Protocol Active - Document context enabled' : 'Standard mode - General AI responses'}
-              </p>
-            </div>
-          </div>
-        ) : (
-          messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
-            >
-              <div
-                className={`max-w-[80%] rounded-xl px-6 py-4 backdrop-filter backdrop-blur-sm ${
-                  message.role === 'user'
-                    ? 'message-user text-white'
-                    : 'message-assistant'
-                }`}
-                style={{
-                  color: message.role === 'user' ? '#ffffff' : 'var(--foreground)',
-                  fontFamily: 'var(--font-body)'
-                }}
-              >
-                <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                
-                {/* Citations for assistant messages */}
-                {message.role === 'assistant' && message.citations && message.citations.length > 0 && (
-                  <div className="mt-4 space-y-3">
-                    <p className="text-xs font-semibold" style={{color: 'var(--neon-teal)', fontFamily: 'var(--font-futuristic)'}}>
-                      DATA SOURCES:
-                    </p>
-                    {message.citations.map((citation) => (
-                      <div
-                        key={citation.id}
-                        className="cyber-card p-3 text-xs border border-opacity-30"
-                        style={{borderColor: 'var(--neon-teal)'}}
-                      >
-                        <p className="mb-2 leading-relaxed" style={{color: 'var(--foreground-secondary)'}}>
-                          {citation.snippet.length > 200
-                            ? `${citation.snippet.substring(0, 200)}...`
-                            : citation.snippet}
-                        </p>
-                        <div className="flex justify-between items-center">
-                          <span style={{color: 'var(--neon-teal)', fontFamily: 'var(--font-futuristic)'}}>
-                            MATCH: {Math.round(citation.similarity * 100)}%
-                          </span>
-                          <a
-                            href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ingest/documents/${citation.document_id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="cyber-button px-3 py-1 text-xs rounded-md hover:scale-105 transition-transform"
-                          >
-                            ACCESS
-                          </a>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-        
-        {/* Loading skeleton */}
-        {loading && (
-          <div className="flex justify-start animate-fade-in">
-            <div className="message-assistant max-w-[80%] rounded-xl px-6 py-4 backdrop-filter backdrop-blur-sm">
-              <div className="flex space-x-3 items-center">
-                <div className="w-3 h-3 rounded-full animate-bounce" style={{background: 'var(--neon-purple)', boxShadow: 'var(--glow-purple)'}}></div>
-                <div className="w-3 h-3 rounded-full animate-bounce" style={{background: 'var(--neon-blue)', boxShadow: 'var(--glow-blue)', animationDelay: '0.1s'}}></div>
-                <div className="w-3 h-3 rounded-full animate-bounce" style={{background: 'var(--neon-teal)', boxShadow: 'var(--glow-teal)', animationDelay: '0.2s'}}></div>
-                <span className="text-sm" style={{color: 'var(--neon-purple)', fontFamily: 'var(--font-futuristic)'}}>
-                  PROCESSING...
+              <div className="flex items-center space-x-4 text-sm">
+                <span className="text-cyan-400 font-medium">MISTRAL-7B QUANTUM CORE</span>
+                <span className="text-gray-500">•</span>
+                <span className={`font-medium ${useRag ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {useRag ? '◉ RAG PROTOCOL ENGAGED' : '○ STANDALONE MODE'}
                 </span>
               </div>
             </div>
+            <div className="flex items-center space-x-2">
+              <div className="cyber-status-indicator"></div>
+              <span className="text-xs text-gray-400 font-mono">SYS_READY</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages Area with Matrix Rain Effect */}
+      <div className="flex-1 overflow-y-auto p-6 message-container relative">
+        <div className="matrix-rain"></div>
+        {messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center max-w-md mx-auto welcome-card">
+              <div className="holographic-icon mx-auto mb-6">
+                <svg className="w-20 h-20" fill="none" stroke="url(#gradient)" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#00f0ff" />
+                      <stop offset="50%" stopColor="#9b5cff" />
+                      <stop offset="100%" stopColor="#00ffcc" />
+                    </linearGradient>
+                  </defs>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
+                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold mb-3 neon-text-cyan">QUANTUM LINK ESTABLISHED</h2>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Neural pathways synchronized. {useRag ? 'Knowledge base integrated.' : 'Direct neural access enabled.'}
+              </p>
+              <div className="mt-6 flex justify-center space-x-2">
+                <div className="pulse-dot"></div>
+                <div className="pulse-dot" style={{animationDelay: '0.2s'}}></div>
+                <div className="pulse-dot" style={{animationDelay: '0.4s'}}></div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6 relative z-10">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} message-appear`}
+              >
+                <div className={`max-w-[75%] ${message.role === 'user' ? 'user-message' : 'ai-message'}`}>
+                  {message.role === 'assistant' && (
+                    <div className="flex items-center space-x-2 mb-2">
+                      <div className="ai-indicator"></div>
+                      <span className="text-xs text-purple-400 font-mono">MISTRAL-7B</span>
+                    </div>
+                  )}
+                  <div className="message-content">
+                    <p className="whitespace-pre-wrap leading-relaxed text-gray-100">
+                      {message.content}
+                    </p>
+                  </div>
+                  
+                  {/* Enhanced Citations */}
+                  {message.role === 'assistant' && message.citations && message.citations.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+                        <span className="text-xs font-bold text-cyan-400 tracking-wider">DATA SOURCES</span>
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+                      </div>
+                      {message.citations.map((citation) => (
+                        <div key={citation.id} className="citation-card">
+                          <div className="flex items-start space-x-3">
+                            <div className="citation-indicator mt-1"></div>
+                            <div className="flex-1">
+                              <p className="text-xs text-gray-300 leading-relaxed mb-2">
+                                {citation.snippet.length > 200
+                                  ? `${citation.snippet.substring(0, 200)}...`
+                                  : citation.snippet}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <div className="match-indicator" style={{width: `${citation.similarity * 100}%`}}></div>
+                                  <span className="text-xs text-cyan-400 font-mono">
+                                    {Math.round(citation.similarity * 100)}% MATCH
+                                  </span>
+                                </div>
+                                <a
+                                  href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ingest/documents/${citation.document_id}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="access-link"
+                                >
+                                  <span>ACCESS</span>
+                                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            
+            {/* Enhanced Loading Animation */}
+            {loading && (
+              <div className="flex justify-start message-appear">
+                <div className="ai-message max-w-[75%]">
+                  <div className="flex items-center space-x-3">
+                    <div className="quantum-loader">
+                      <div className="quantum-particle"></div>
+                      <div className="quantum-particle"></div>
+                      <div className="quantum-particle"></div>
+                    </div>
+                    <span className="text-sm text-purple-400 font-mono animate-pulse">
+                      QUANTUM PROCESSING...
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
-        
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Control Panel */}
-      <div className="p-6">
-        {/* RAG Controls */}
-        <div className="mb-4 flex flex-wrap gap-6 items-center text-sm">
-          <label className="flex items-center space-x-3">
-            <input
-              type="checkbox"
-              checked={useRag}
-              onChange={(e) => setUseRag(e.target.checked)}
-              className="w-4 h-4 rounded border-2 border-blue-400 bg-transparent checked:bg-blue-500 focus:ring-2 focus:ring-blue-500"
-            />
-            <span style={{color: 'var(--neon-blue)', fontFamily: 'var(--font-futuristic)'}}>RAG PROTOCOL</span>
-          </label>
+      {/* Control Panel with Holographic UI */}
+      <div className="control-panel p-6">
+        {/* RAG Controls with Futuristic Toggle */}
+        <div className="mb-4 flex flex-wrap gap-4 items-center">
+          <div className="flex items-center space-x-3">
+            <label className="quantum-switch">
+              <input
+                type="checkbox"
+                checked={useRag}
+                onChange={(e) => setUseRag(e.target.checked)}
+              />
+              <span className="quantum-slider"></span>
+            </label>
+            <span className="text-sm font-bold text-cyan-400 tracking-wider">RAG PROTOCOL</span>
+          </div>
           
           {useRag && (
             <>
-              <label className="flex items-center space-x-3">
-                <span style={{color: 'var(--neon-teal)', fontFamily: 'var(--font-futuristic)'}}>TOP-K:</span>
+              <div className="flex items-center space-x-3 cyber-control">
+                <span className="text-sm text-purple-400 font-mono">VECTOR_DEPTH:</span>
                 <input
                   type="number"
                   min="1"
                   max="10"
                   value={topK}
                   onChange={(e) => setTopK(Number(e.target.value))}
-                  className="w-16 cyber-input rounded-md px-2 py-1 text-sm text-center"
+                  className="quantum-input w-20 text-center"
                 />
-              </label>
+              </div>
               
-              <label className="flex items-center space-x-3">
-                <span style={{color: 'var(--neon-purple)', fontFamily: 'var(--font-futuristic)'}}>TARGET:</span>
+              <div className="flex items-center space-x-3 cyber-control">
+                <span className="text-sm text-emerald-400 font-mono">TARGET_DOC:</span>
                 <select
                   value={selectedDocId || ''}
                   onChange={() => onDocumentsRefresh()}
-                  className="cyber-input rounded-md px-3 py-1 text-sm"
+                  className="quantum-select"
                 >
-                  <option value="">ALL DOCUMENTS</option>
+                  <option value="">◉ ALL DOCUMENTS</option>
                   {documents.map((doc) => (
                     <option key={doc.id} value={doc.id}>
-                      {doc.file_name}
+                      ▸ {doc.file_name}
                     </option>
                   ))}
                 </select>
-              </label>
+              </div>
             </>
           )}
         </div>
 
-        {/* Error Display */}
+        {/* Error Display with Glitch Effect */}
         {error && (
-          <div className="mb-4 p-3 rounded-lg border-2 border-red-500 bg-red-900 bg-opacity-20">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <span className="text-red-400 text-sm" style={{fontFamily: 'var(--font-futuristic)'}}>
+          <div className="error-alert mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="error-icon-pulse"></div>
+              <span className="text-sm font-mono glitch-text" data-text={`ERROR: ${error}`}>
                 ERROR: {error}
               </span>
             </div>
           </div>
         )}
 
-        {/* Message Input */}
+        {/* Message Input with Quantum Design */}
         <div className="flex space-x-4">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Enter neural command..."
-            className="flex-1 cyber-input rounded-xl px-4 py-3 resize-none text-base"
-            style={{minHeight: '60px'}}
-            disabled={loading}
-          />
+          <div className="flex-1 relative">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Enter quantum command sequence..."
+              className="quantum-textarea w-full"
+              rows={2}
+              disabled={loading}
+            />
+            <div className="input-border-glow"></div>
+          </div>
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="cyber-button px-6 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{fontFamily: 'var(--font-futuristic)'}}
+            className="quantum-send-button"
           >
             {loading ? (
               <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                <span>TRANSMIT</span>
+                <div className="transmit-loader"></div>
+                <span>TRANSMITTING</span>
               </div>
             ) : (
-              'TRANSMIT'
+              <div className="flex items-center space-x-2">
+                <span>TRANSMIT</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                        d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
             )}
           </button>
         </div>
