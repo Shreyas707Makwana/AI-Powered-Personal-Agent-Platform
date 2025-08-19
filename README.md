@@ -4,7 +4,7 @@
 
 An end-to-end, production-ready AI assistant that brings your documents to life. Upload PDFs, get context-aware answers powered by RAG (Retrieval-Augmented Generation), and experience secure, personalized interactions—all wrapped in a beautiful, modern interface.
 
-[![Deploy Status](https://img.shields.io/badge/Deploy-Live-brightgreen)](https://your-demo-link.com)
+[![Deploy Status](https://img.shields.io/badge/Deploy-Live-brightgreen)](https://ai-powered-personal-agent-platform.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Latest-teal)](https://fastapi.tiangolo.com/)
@@ -255,9 +255,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 👨‍💻 **Author**
 
 **Shreyas Makwana**  
-- 🌐 [Portfolio](https://your-portfolio.com)
-- 💼 [LinkedIn](https://linkedin.com/in/yourusername)
-- 🐦 [Twitter](https://twitter.com/yourusername)
+- 🌐 [Portfolio](https://portfolio-website-shreyas.vercel.app/)
+- 💼 [LinkedIn](www.linkedin.com/in/shreyas-makwana)
 
 ---
 
