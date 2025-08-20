@@ -1,6 +1,4 @@
 -- AI Agent Platform - Authentication and RLS Setup SQL
--- Run this in your Supabase SQL Editor
-
 -- 1. Enable pgvector extension (if not already enabled)
 CREATE EXTENSION IF NOT EXISTS vector;
 
@@ -224,6 +222,3 @@ USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
-
--- Success message
-SELECT 'Auth-first RLS setup completed successfully! 🎉' as status;
