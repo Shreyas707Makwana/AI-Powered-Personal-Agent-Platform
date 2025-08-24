@@ -1,13 +1,12 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": ".next",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
   "framework": "nextjs",
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://your-render-backend-url.onrender.com/api/$1"
+      "destination": "https://ai-powered-personal-agent-platform.onrender.com/api/$1"
     }
   ]
 }
+
