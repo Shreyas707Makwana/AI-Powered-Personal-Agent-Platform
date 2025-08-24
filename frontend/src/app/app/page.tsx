@@ -7,6 +7,9 @@ import Chat from '@/components/Chat';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
+import ToolsCard from '@/components/ToolsCard';
+import { openWeatherTool, openNewsTool } from '@/lib/toolBus';
+import Button from '@/components/Button';
 
 export default function AppPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -15,6 +18,7 @@ export default function AppPage() {
   const [showUploadDrawer, setShowUploadDrawer] = useState(false);
   const [showArchiveDrawer, setShowArchiveDrawer] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,6 +33,12 @@ export default function AppPage() {
     };
 
     checkAuth();
+
+    // restore sidebar preference
+    try {
+      const saved = localStorage.getItem('sidebarCollapsed');
+      if (saved) setSidebarCollapsed(saved === '1');
+    } catch {}
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -58,6 +68,14 @@ export default function AppPage() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push('/login');
+  };
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem('sidebarCollapsed', next ? '1' : '0'); } catch {}
+      return next;
+    });
   };
 
   if (loading) {
@@ -121,17 +139,35 @@ export default function AppPage() {
             </button>
 
             {/* Desktop User Info */}
-            <div className="hidden lg:flex items-center space-x-6">
-              <div className="flex items-center space-x-3 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
-                <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50"></div>
-                <span className="text-sm font-mono text-emerald-400 truncate max-w-48">{user?.email}</span>
+            <div className="hidden lg:flex items-center space-x-4">
+              <div className="flex items-center space-x-3 bg-gray-800/60 px-4 py-2 rounded-lg border border-gray-700/50">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-sm text-gray-300 truncate max-w-48">{user?.email}</span>
               </div>
-              <button
-                onClick={handleSignOut}
-                className="quantum-button text-sm px-6 py-2 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-400 transition-all"
+              <Button
+                variant="muted"
+                size="sm"
+                onClick={toggleSidebar}
+                aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                className="btn btn-muted flex items-center gap-2"
               >
-                SIGN_OUT
-              </button>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sidebarCollapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
+                </svg>
+                <span>{sidebarCollapsed ? 'Expand' : 'Collapse'}</span>
+              </Button>
+              <a href="/analytics">
+                <Button variant="secondary" size="sm" className="btn btn-secondary">Analytics</Button>
+              </a>
+              <Button
+                variant="muted"
+                size="sm"
+                onClick={handleSignOut}
+                className="hover:!bg-red-900/20 hover:!border-red-500/30 hover:!text-red-300"
+              >
+                Sign Out
+              </Button>
             </div>
           </div>
 
@@ -144,26 +180,52 @@ export default function AppPage() {
                     <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
                     <span className="text-sm font-mono text-emerald-400">{user?.email}</span>
                   </div>
-                  <button
+                  <Button
+                    variant="muted"
+                    size="sm"
                     onClick={handleSignOut}
-                    className="quantum-button text-xs px-4 py-2"
+                    className="hover:!bg-red-900/20 hover:!border-red-500/30 hover:!text-red-300"
                   >
-                    SIGN_OUT
-                  </button>
+                    Sign Out
+                  </Button>
                 </div>
                 <div className="flex space-x-3">
-                  <button
-                    className="flex-1 quantum-button py-3 text-sm"
+                  <a href="/analytics" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="secondary" size="md" className="w-full">Analytics</Button>
+                  </a>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    className="flex-1"
                     onClick={() => { setShowUploadDrawer(true); setIsMobileMenuOpen(false); }}
                   >
-                    📤 UPLOAD
-                  </button>
-                  <button
-                    className="flex-1 quantum-button py-3 text-sm"
+                    📤 Upload
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    className="flex-1"
                     onClick={() => { setShowArchiveDrawer(true); setIsMobileMenuOpen(false); }}
                   >
-                    🗃️ ARCHIVE
-                  </button>
+                    🗃️ Archive
+                  </Button>
+                </div>
+                {/* Tools shortcuts for mobile */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => { openWeatherTool(); setIsMobileMenuOpen(false); }}
+                  >
+                    ☀️ Weather
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => { openNewsTool(); setIsMobileMenuOpen(false); }}
+                  >
+                    📰 News
+                  </Button>
                 </div>
               </div>
             </div>
@@ -175,8 +237,12 @@ export default function AppPage() {
       <main className="relative z-10 min-h-[calc(100vh-5rem)] lg:min-h-[calc(100vh-6rem)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 h-full">
-            {/* Enhanced Left Column: Upload + Archive (Desktop) */}
+            {/* Enhanced Left Column: Tools + Upload + Archive (Desktop, collapsible) */}
+            {!sidebarCollapsed && (
             <div className="hidden lg:flex lg:col-span-5 xl:col-span-4 flex-col space-y-6">
+              <div className="transform hover:scale-[1.02] transition-transform duration-300">
+                <ToolsCard />
+              </div>
               <div className="transform hover:scale-[1.02] transition-transform duration-300">
                 <Upload onUploaded={handleUploaded} />
               </div>
@@ -188,9 +254,10 @@ export default function AppPage() {
                 />
               </div>
             </div>
+            )}
 
             {/* Enhanced Chat Column (Responsive) */}
-            <div className="lg:col-span-7 xl:col-span-8 flex flex-col min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-10rem)]">
+            <div className={`${sidebarCollapsed ? 'lg:col-span-12 xl:col-span-12' : 'lg:col-span-7 xl:col-span-8'} flex flex-col min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-10rem)]`}>
               <div className="flex-1 transform hover:scale-[1.01] transition-transform duration-300">
                 <Chat 
                   selectedDocId={selectedDocId}

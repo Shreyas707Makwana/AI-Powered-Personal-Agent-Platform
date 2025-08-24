@@ -40,46 +40,26 @@ def vector_to_pgvector_literal(vec: List[float]) -> str:
     return f"[{','.join(map(str, vec))}]"
 
 def get_db_connection():
-    """Get a database connection using DATABASE_URL"""
+    """Get a database connection using DATABASE_URL.
+    Uses psycopg2's native URI parsing to correctly handle URL-encoded passwords
+    and optional query parameters like sslmode.
+    """
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         raise ValueError("DATABASE_URL environment variable not set")
-    
-    # Parse the URL to extract components for psycopg2
-    if database_url.startswith("postgresql://"):
-        # Convert to psycopg2 format
-        db_url = database_url.replace("postgresql://", "")
-        if "@" in db_url:
-            auth, rest = db_url.split("@", 1)
-            if ":" in auth:
-                user, password = auth.split(":", 1)
-            else:
-                user, password = auth, ""
-            
-            if "/" in rest:
-                host_port, database = rest.split("/", 1)
-                if ":" in host_port:
-                    host, port = host_port.split(":", 1)
-                else:
-                    host, port = host_port, "5432"
-            else:
-                host, port, database = rest, "5432", ""
-            
-            # Build connection parameters
-            conn_params = {
-                "host": host,
-                "port": port,
-                "database": database,
-                "user": user,
-                "password": password,
-                "sslmode": "require"
-            }
-            
-            return psycopg2.connect(**conn_params)
-        else:
-            raise ValueError("Invalid DATABASE_URL format")
-    else:
-        raise ValueError("DATABASE_URL must start with postgresql://")
+
+    # Accept both postgresql:// and postgres:// prefixes
+    if not (database_url.startswith("postgresql://") or database_url.startswith("postgres://")):
+        raise ValueError("DATABASE_URL must start with postgresql:// or postgres://")
+
+    # If sslmode is not provided, enforce require by default
+    if "sslmode=" not in database_url:
+        # Append with proper separator
+        sep = "&" if "?" in database_url else "?"
+        database_url = f"{database_url}{sep}sslmode=require"
+
+    # Let psycopg2 parse the URI (handles percent-encoding correctly)
+    return psycopg2.connect(database_url)
 
 async def search_similar_chunks(query: str, top_k: int = 5, document_id: Optional[str] = None, user_id: Optional[str] = None) -> List[Dict]:
     """

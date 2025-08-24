@@ -99,7 +99,7 @@ export default function LoginPage() {
           <p className="text-gray-400 text-sm leading-relaxed mb-6">
             Advanced AI-powered document intelligence platform with neural RAG capabilities. 
             Upload PDFs, engage with quantum-enhanced chat, and unlock the power of semantic search 
-            through our Mistral-7B neural core.
+            through our Llama-3.1-8B neural core.
           </p>
 
           <div className="flex items-center justify-center space-x-3 mb-6">
@@ -120,11 +120,12 @@ export default function LoginPage() {
               className="quantum-input w-full"
               placeholder="user@quantum.net"
               required
+              suppressHydrationWarning
             />
           </div>
           
           <div>
-            <label className="block text-sm font-mono text-cyan-400 mb-2">NEURAL_KEY</label>
+            <label className="block text-sm font-mono text-cyan-400 mb-2">Password</label>
             <input
               type="password"
               value={password}
@@ -132,6 +133,7 @@ export default function LoginPage() {
               className="quantum-input w-full"
               placeholder="••••••••"
               required
+              suppressHydrationWarning
             />
           </div>
 
@@ -148,7 +150,8 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="quantum-button-primary w-full"
+            className="btn btn-primary text-lg px-6 py-3 rounded-xl w-full font-heading"
+            suppressHydrationWarning
           >
             {loading ? (
               <div className="flex items-center justify-center space-x-2">
@@ -160,7 +163,7 @@ export default function LoginPage() {
                 <span>PROCESSING...</span>
               </div>
             ) : (
-              isSignUp ? 'INITIALIZE_ACCESS' : 'AUTHENTICATE'
+              'Get Started'
             )}
           </button>
         </form>
@@ -171,11 +174,12 @@ export default function LoginPage() {
               setIsSignUp(!isSignUp);
               setMessage('');
             }}
-            className="text-sm text-gray-400 hover:text-cyan-400 font-mono transition-colors"
+            className="text-sm bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 hover:text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25"
+            suppressHydrationWarning
           >
             {isSignUp 
-              ? 'Already have neural access? AUTHENTICATE' 
-              : 'Need quantum access? INITIALIZE_ACCOUNT'
+              ? 'Already have an account? Sign In' 
+              : 'New User? Sign Up'
             }
           </button>
         </div>
@@ -185,7 +189,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-center space-x-4 text-xs font-mono text-gray-500">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-              <span>MISTRAL-7B CORE</span>
+              <span>LLAMA-3.1-8B CORE</span>
             </div>
             <span>•</span>
             <div className="flex items-center space-x-2">
