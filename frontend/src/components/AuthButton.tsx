@@ -55,7 +55,7 @@ export default function AuthButton({ className = '' }: AuthButtonProps) {
         setEmail('');
         setPassword('');
       }
-    } catch (error) {
+    } catch {
       alert('Sign in failed');
     } finally {
       setAuthLoading(false);
@@ -80,7 +80,7 @@ export default function AuthButton({ className = '' }: AuthButtonProps) {
         setEmail('');
         setPassword('');
       }
-    } catch (error) {
+    } catch {
       alert('Sign up failed');
     } finally {
       setAuthLoading(false);
@@ -167,7 +167,7 @@ export default function AuthButton({ className = '' }: AuthButtonProps) {
               </div>
               
               <div>
-                <label className="block text-sm font-mono text-cyan-400 mb-2">NEURAL_KEY</label>
+                <label className="block text-sm font-mono text-cyan-400 mb-2">Password</label>
                 <input
                   type="password"
                   value={password}

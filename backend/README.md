@@ -1,12 +1,12 @@
 # AI Agent Platform Backend
 
-A FastAPI-based backend for the AI-Powered Personal Agent Platform, featuring integration with Hugging Face's Mistral-7B-Instruct model via the Router API.
+A FastAPI-based backend for the AI-Powered Personal Agent Platform, featuring integration with Hugging Face's Llama-3.1-8B model via the Router API.
 
 ## 🚀 Features
 
 - **FastAPI Backend**: Modern, fast web framework for building APIs
 - **Hugging Face Integration**: Uses the Router API for reliable model access
-- **Mistral-7B-Instruct**: State-of-the-art language model for chat interactions
+- **Llama-3.1-8B**: State-of-the-art language model for chat interactions
 - **RAG (Retrieval-Augmented Generation)**: Document ingestion and semantic search
 - **PDF Processing**: Text extraction and chunking with PyMuPDF
 - **Vector Embeddings**: Sentence transformers for semantic similarity
@@ -164,7 +164,7 @@ curl http://localhost:8000/
 # API status
 curl http://localhost:8000/api/status
 
-# Chat with Mistral
+# Chat with Llama-3.1-8B
 curl -X POST "http://localhost:8000/api/llm/chat" \
   -H "Content-Type: application/json" \
   -d "{\"messages\": [{\"role\": \"user\", \"content\": \"Hello!\"}]}"
@@ -198,7 +198,7 @@ Health check endpoint
 ```json
 {
   "status": "healthy",
-  "message": "AI Agent Platform API is running with Mistral-7B-Instruct",
+  "message": "AI Agent Platform API is running with Llama-3.1-8B",
   "version": "1.0.0"
 }
 ```
@@ -219,14 +219,14 @@ Detailed API information
 {
   "status": "running",
   "service": "AI Agent Platform Backend",
-  "ai_model": "Mistral-7B-Instruct",
+  "ai_model": "Llama-3.1-8B",
   "version": "1.0.0",
   "environment": "development"
 }
 ```
 
 ### POST `/api/llm/chat`
-Chat with Mistral model
+Chat with Llama-3.1-8B model
 ```json
 {
   "messages": [
@@ -246,7 +246,7 @@ Chat with Mistral model
 ```
 
 ### POST `/api/llm/chat` (RAG-Enabled)
-Chat with Mistral model using RAG for document context
+Chat with Llama-3.1-8B model using RAG for document context
 
 **Request with RAG:**
 ```json
@@ -360,7 +360,7 @@ Check RAG system status (embedding model and database)
 3. **Vector Storage**: Embeddings stored in Supabase with pgvector extension
 4. **Semantic Search**: User queries are embedded and matched against stored vectors
 5. **Context Retrieval**: Top-k most similar chunks are retrieved
-6. **LLM Generation**: Context + question sent to Mistral-7B for answer generation
+6. **LLM Generation**: Context + question sent to Llama-3.1-8B for answer generation
 7. **Citation Tracking**: Each response includes source document and chunk information
 
 ### RAG Components
@@ -373,7 +373,7 @@ Check RAG system status (embedding model and database)
 
 ### Router API
 - **Base URL**: `https://router.huggingface.co/v1`
-- **Model**: `mistralai/Mistral-7B-Instruct-v0.2:featherless-ai`
+- **Model**: `meta-llama/Meta-Llama-3.1-8B-Instruct`
 - **Authentication**: Bearer token via `HF_API_KEY`
 
 ### Why Router API?

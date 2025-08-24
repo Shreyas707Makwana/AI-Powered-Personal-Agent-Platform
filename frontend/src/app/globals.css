@@ -1,6 +1,25 @@
 @import "tailwindcss";
 
 :root {
+  /* Professional Dark Theme */
+  --surface-primary: #0b0c10;
+  --surface-secondary: #1f2937;
+  --surface-tertiary: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --border-subtle: #374151;
+  --border-emphasis: #4b5563;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #8b5cf6;
+  --primary-rgb: 59, 130, 246;
+  --glow-intensity: 0.15;
+  --ring-opacity: 0.06;
+  
+  /* Font variables */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --font-heading: 'Space Grotesk', 'Inter', sans-serif;
+  
   /* Quantum Dark Palette */
   --background: #030308;
   --background-secondary: #0a0a1a;
@@ -17,11 +36,11 @@
   --neon-cyan: #00e5ff;
   --neon-magenta: #ff00ff;
   
-  /* Quantum Glow Effects */
-  --glow-blue: 0 0 40px rgba(0, 240, 255, 0.5);
-  --glow-purple: 0 0 40px rgba(155, 92, 255, 0.5);
-  --glow-teal: 0 0 40px rgba(0, 255, 204, 0.5);
-  --glow-pink: 0 0 40px rgba(255, 0, 170, 0.5);
+  /* Reduced Glow Effects */
+  --glow-blue: 0 0 8px rgba(0, 240, 255, 0.15);
+  --glow-purple: 0 0 8px rgba(155, 92, 255, 0.15);
+  --glow-teal: 0 0 8px rgba(0, 255, 204, 0.15);
+  --glow-pink: 0 0 8px rgba(255, 0, 170, 0.15);
   
   /* Typography */
   --font-futuristic: 'Orbitron', monospace;
@@ -32,10 +51,23 @@
   box-sizing: border-box;
 }
 
+html, body {
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+input, textarea, select {
+  font-family: var(--font-sans);
+  font-size: 16px;
+}
+
 body {
   background: radial-gradient(ellipse at center top, #0a0a1a 0%, #030308 50%, #000000 100%);
   color: var(--foreground);
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
@@ -442,12 +474,7 @@ body::before {
   font-size: 0.75rem;
   color: var(--neon-purple);
   text-decoration: none;
-  font-family: var(--font-futuristic);
-  transition: all 0.3s ease;
-}
-
-.access-link:hover {
-  color: var(--neon-cyan);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
   text-shadow: 0 0 10px currentColor;
 }
 
@@ -563,7 +590,7 @@ input:checked + .quantum-slider:before {
   color: var(--foreground);
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
-  font-family: var(--font-futuristic);
+  font-family: var(--font-sans);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   font-size: 14px;
@@ -1210,6 +1237,54 @@ input:checked + .quantum-slider:before {
   width: 30px;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--neon-cyan));
+}
+
+/* Enhanced Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.5);
+  font-family: var(--font-sans);
+}
+
+.btn-primary {
+  background: linear-gradient(45deg, rgba(0, 240, 255, 0.25), rgba(155, 92, 255, 0.25));
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  color: white;
+}
+
+.btn-secondary {
+  background: linear-gradient(45deg, rgba(75, 85, 99, 0.8), rgba(55, 65, 81, 0.8));
+  border: 1px solid rgba(75, 85, 99, 0.6);
+  color: white;
+}
+
+.btn-muted {
+  background: linear-gradient(45deg, rgba(55, 65, 81, 0.6), rgba(31, 41, 55, 0.6));
+  border: 1px solid rgba(55, 65, 81, 0.4);
+  color: #d1d5db;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(2,6,23,0.7);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(45deg, rgba(0, 240, 255, 0.35), rgba(155, 92, 255, 0.35));
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.5), 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary:hover, .btn-muted:hover {
+  background: linear-gradient(45deg, rgba(75, 85, 99, 0.9), rgba(55, 65, 81, 0.9));
+  box-shadow: 0 0 15px rgba(75, 85, 99, 0.4), 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .quantum-signature.reverse .signature-line {

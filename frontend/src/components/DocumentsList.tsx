@@ -85,7 +85,7 @@ export default function DocumentsList({ selectedDocId, onDocumentSelect, onRefre
           <div>
             <div className="flex items-center space-x-3 mb-2">
               <div className="data-orb"></div>
-              <h2 className="text-lg font-bold neon-text-purple tracking-wider">
+              <h2 className="text-lg font-bold tracking-wider">
                 QUANTUM DATA ARCHIVE
               </h2>
             </div>
@@ -107,15 +107,21 @@ export default function DocumentsList({ selectedDocId, onDocumentSelect, onRefre
           </button>
         </div>
 
-        {/* Loading State */}
+        {/* Loading State (skeletons) */}
         {loading && (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="archive-scanner mx-auto mb-4"></div>
-              <p className="text-sm text-cyan-400 font-mono animate-pulse">
-                SCANNING QUANTUM ARCHIVE...
-              </p>
-            </div>
+          <div className="flex-1 overflow-y-auto space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="document-card">
+                <div className="flex items-start space-x-3 animate-pulse">
+                  <div className="w-5 h-5 rounded bg-gray-700/60" />
+                  <div className="flex-1 min-w-0">
+                    <div className="h-4 bg-gray-700/60 rounded w-2/3 mb-2" />
+                    <div className="h-3 bg-gray-700/50 rounded w-1/3" />
+                  </div>
+                  <div className="w-20 h-5 bg-gray-700/60 rounded-full" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -146,7 +152,7 @@ export default function DocumentsList({ selectedDocId, onDocumentSelect, onRefre
                 </svg>
               </div>
               <div className="flex flex-col items-center">
-                <h3 className="text-lg font-bold mb-2 neon-text-purple text-center">ARCHIVE EMPTY</h3>
+                <h3 className="text-lg font-bold mb-2 text-center">ARCHIVE EMPTY</h3>
                 <p className="text-sm text-gray-400 text-center">
                   Upload documents to initialize<br />quantum knowledge base
                 </p>

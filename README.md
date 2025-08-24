@@ -11,6 +11,38 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 
 ---
 
+## 🧠 Manual Testing: Memories
+
+1. Apply migrations for memories tables and RLS (see files in `infra/migrations/` such as `20250823_create_memories.sql`).
+2. Backend `.env` add (in addition to existing):
+   - `EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2`
+   - `MEMORY_SUMMARIZER_MODEL=` (optional)
+   - `MEMORY_TOP_K=5` (optional)
+   - `MEMORY_EMBEDDING_DIM=384` (or match your model)
+   - `MEMORY_AUTOSAVE_DEFAULT=true`
+3. Start backend and frontend.
+4. Open `/app` and use chat normally. After responses, a subtle banner in chat indicates if memories informed the answer.
+5. Visit `/memories`:
+   - Use the search box for semantic search over your memories
+   - Toggle “Autosave memories”
+   - Click “Condense conversation” to create memories from pasted chat
+   - Delete a memory using the trash icon
+6. Run `./test_memory_flow.sh` with `API_BASE` and `TOKEN` to validate list/search/create/delete, preferences, condense, and chat integration.
+
+---
+
+## 🧭 **Manual Testing: Tools & Modal**
+
+1. Tools migration: ensure `infra/migrations/20250822_add_tools.sql` applied to DB (creates `tools`, `agent_tools`, `tool_logs` and inserts `weather`).
+2. Backend `.env`: set `OPENWEATHER_API_KEY` and optional `TOOL_TIMEOUT_SECONDS`.
+3. Start backend and frontend as usual.
+4. Agents page `/agents`: toggle-enable the `Weather` tool for an agent.
+5. Chat page: click `TOOLS` to open ToolModal, enter a city (e.g., "London"), verify result JSON.
+6. cURL script: run `test_tools_api.sh` with `API_BASE`, `TOKEN`, and optional `AGENT_ID` to validate list/enable/execute endpoints.
+7. LLM tool_call: send a chat where the model replies with `{ "tool_call": { "tool_key": "weather", "params": { "city": "Paris" } } }`. The backend will execute and inject results inline.
+
+---
+
 ## 🎯 **What Makes This Special?**
 
 - **🧠 Smart Document Understanding** - Upload PDFs and chat with them like never before
@@ -30,7 +62,7 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 - **Source Citations** - Every answer links back to specific document sections
 
 ### 💬 **Conversational AI**
-- **Context-Aware Chat** - Powered by Mistral-7B-Instruct via Hugging Face Router
+- **Context-Aware Chat** - Powered by Llama-3.1-8B via Hugging Face Router
 - **Memory Retention** - Maintains conversation context for natural interactions
 - **Multi-Document Support** - Query across all your uploaded documents
 
@@ -54,7 +86,7 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
                        ┌─────────────────┐
                        │  Hugging Face   │
                        │     Router      │
-                       │ (Mistral-7B)    │
+                       │ (Llama-3.1-8B)  │
                        └─────────────────┘
 ```
 
@@ -62,7 +94,7 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 1. **Authentication** → User logs in via Supabase, receives JWT token
 2. **Document Upload** → PDF processed, chunked, and embedded
 3. **Query Processing** → RAG retrieval finds relevant chunks
-4. **AI Generation** → Mistral generates contextual responses
+4. **AI Generation** → Llama-3.1-8B generates contextual responses
 5. **Citation Linking** → Responses include source references
 
 ---
@@ -87,7 +119,7 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 
 ### **AI & ML**
 - ![Hugging Face](https://img.shields.io/badge/-Hugging_Face-yellow?logo=huggingface) **Hugging Face Router** - OpenAI-compatible API
-- **Mistral-7B-Instruct** - Large language model for generation
+- **Llama-3.1-8B** - Large language model for generation
 - **Sentence Transformers** - Document embeddings
 - **PyMuPDF** - PDF parsing and text extraction
 
@@ -121,6 +153,11 @@ pip install -r requirements.txt
 # Configure environment
 cp .env.example .env
 # Edit .env with your credentials
+
+# Required environment variables (in addition to existing)
+# Tools / Weather
+# OPENWEATHER_API_KEY=your_openweather_api_key
+# TOOL_TIMEOUT_SECONDS=10  # optional
 
 # Start the server
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
@@ -159,6 +196,24 @@ npm run dev
 
 ---
 
+## 🔧 **Environment Variables**
+
+Add the following to `backend/.env`:
+
+- `OPENWEATHER_API_KEY` — API key for OpenWeatherMap (Weather tool)
+- `TOOL_TIMEOUT_SECONDS` — optional HTTP timeout in seconds for tool calls (default: 10)
+
+Ensure your Supabase variables and existing settings remain unchanged.
+
+### Memory Feature
+- `EMBEDDING_MODEL` — e.g. `sentence-transformers/all-MiniLM-L6-v2`
+- `MEMORY_SUMMARIZER_MODEL` — optional summarizer
+- `MEMORY_TOP_K` — retrieval count (default: 5)
+- `MEMORY_EMBEDDING_DIM` — vector dimension (e.g., 384)
+- `MEMORY_AUTOSAVE_DEFAULT` — default autosave (true/false)
+
+---
+
 ## 📡 **API Reference**
 
 | Endpoint | Method | Description | Auth Required |
@@ -167,6 +222,10 @@ npm run dev
 | `/api/ingest/upload` | POST | Upload PDF document | ✅ |
 | `/api/ingest/documents` | GET | List user documents | ✅ |
 | `/api/llm/chat` | POST | RAG-enabled chat | ✅ |
+| `/api/tools` | GET | List all registered tools | ✅ |
+| `/api/tools/execute` | POST | Execute a tool (server-side) | ✅ |
+| `/api/agents/{agent_id}/tools` | GET | List an agent's enabled tools | ✅ |
+| `/api/agents/{agent_id}/tools/{tool_key}` | PUT | Enable/disable/configure a tool per agent | ✅ |
 | `/api/me` | GET | Current user profile | ✅ |
 
 ### **Example Chat Request**
