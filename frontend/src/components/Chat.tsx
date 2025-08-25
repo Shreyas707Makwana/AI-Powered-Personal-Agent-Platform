@@ -127,6 +127,15 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
       setMessages(mapped);
     } catch (e) {
       console.error('Failed to load conversation messages', e);
+      // Auto-recover if the conversation was deleted or belongs to another session/user.
+      // Our API throws an Error with message containing the HTTP status, e.g., "Failed to list messages: 404".
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes('404')) {
+        // Clear stale selection and stored conversation id
+        try { window.localStorage.removeItem('lastConversationId'); } catch {}
+        setConversationId(null);
+        setMessages([]);
+      }
     }
   };
 
