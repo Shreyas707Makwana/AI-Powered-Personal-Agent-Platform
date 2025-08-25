@@ -11,6 +11,38 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 
 ---
 
+## 🧠 Manual Testing: Memories
+
+1. Apply migrations for memories tables and RLS (see files in `infra/migrations/` such as `20250823_create_memories.sql`).
+2. Backend `.env` add (in addition to existing):
+   - `EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2`
+   - `MEMORY_SUMMARIZER_MODEL=` (optional)
+   - `MEMORY_TOP_K=5` (optional)
+   - `MEMORY_EMBEDDING_DIM=384` (or match your model)
+   - `MEMORY_AUTOSAVE_DEFAULT=true`
+3. Start backend and frontend.
+4. Open `/app` and use chat normally. After responses, a subtle banner in chat indicates if memories informed the answer.
+5. Visit `/memories`:
+   - Use the search box for semantic search over your memories
+   - Toggle “Autosave memories”
+   - Click “Condense conversation” to create memories from pasted chat
+   - Delete a memory using the trash icon
+6. Run `./test_memory_flow.sh` with `API_BASE` and `TOKEN` to validate list/search/create/delete, preferences, condense, and chat integration.
+
+---
+
+## 🧭 **Manual Testing: Tools & Modal**
+
+1. Tools migration: ensure `infra/migrations/20250822_add_tools.sql` applied to DB (creates `tools`, `agent_tools`, `tool_logs` and inserts `weather`).
+2. Backend `.env`: set `OPENWEATHER_API_KEY` and optional `TOOL_TIMEOUT_SECONDS`.
+3. Start backend and frontend as usual.
+4. Agents page `/agents`: toggle-enable the `Weather` tool for an agent.
+5. Chat page: click `TOOLS` to open ToolModal, enter a city (e.g., "London"), verify result JSON.
+6. cURL script: run `test_tools_api.sh` with `API_BASE`, `TOKEN`, and optional `AGENT_ID` to validate list/enable/execute endpoints.
+7. LLM tool_call: send a chat where the model replies with `{ "tool_call": { "tool_key": "weather", "params": { "city": "Paris" } } }`. The backend will execute and inject results inline.
+
+---
+
 ## 🎯 **What Makes This Special?**
 
 - **🧠 Smart Document Understanding** - Upload PDFs and chat with them like never before
