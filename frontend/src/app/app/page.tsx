@@ -43,7 +43,7 @@ export default function AppPage() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
-        router.push('/login');
+        router.push('/');
       } else if (session) {
         setUser(session.user);
         setLoading(false);
@@ -67,7 +67,7 @@ export default function AppPage() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    router.push('/');
   };
 
   const toggleSidebar = () => {
@@ -160,6 +160,9 @@ export default function AppPage() {
               <a href="/analytics">
                 <Button variant="secondary" size="sm" className="btn btn-secondary">Analytics</Button>
               </a>
+              <a href="/agents">
+                <Button variant="secondary" size="sm" className="btn btn-secondary">Manage Agents</Button>
+              </a>
               <Button
                 variant="muted"
                 size="sm"
@@ -192,6 +195,9 @@ export default function AppPage() {
                 <div className="flex space-x-3">
                   <a href="/analytics" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button variant="secondary" size="md" className="w-full">Analytics</Button>
+                  </a>
+                  <a href="/agents" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="secondary" size="md" className="w-full">Manage Agents</Button>
                   </a>
                   <Button
                     variant="secondary"
