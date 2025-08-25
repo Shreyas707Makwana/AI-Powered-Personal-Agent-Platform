@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
-import { useRouter } from 'next/navigation';
 
 interface AuthButtonProps {
   className?: string;
@@ -17,7 +16,6 @@ export default function AuthButton({ className = '' }: AuthButtonProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     // Get initial session
@@ -93,8 +91,6 @@ export default function AuthButton({ className = '' }: AuthButtonProps) {
     const { error } = await supabase.auth.signOut();
     if (error) {
       alert(`Sign out error: ${error.message}`);
-    } else {
-      router.replace('/');
     }
   };
 

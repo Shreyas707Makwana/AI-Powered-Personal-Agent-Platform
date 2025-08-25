@@ -127,15 +127,6 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
       setMessages(mapped);
     } catch (e) {
       console.error('Failed to load conversation messages', e);
-      // Auto-recover if the conversation was deleted or belongs to another session/user.
-      // Our API throws an Error with message containing the HTTP status, e.g., "Failed to list messages: 404".
-      const msg = e instanceof Error ? e.message : String(e);
-      if (msg.includes('404')) {
-        // Clear stale selection and stored conversation id
-        try { window.localStorage.removeItem('lastConversationId'); } catch {}
-        setConversationId(null);
-        setMessages([]);
-      }
     }
   };
 
@@ -521,6 +512,12 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
               ))}
             </select>
 
+            <a
+              href="/agents"
+              className="px-3 py-1.5 rounded-md border border-cyan-500/60 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:text-cyan-200 transition-colors font-mono text-xs md:text-sm"
+            >
+              MANAGE
+            </a>
           </div>
         </div>
 
