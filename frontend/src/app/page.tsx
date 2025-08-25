@@ -142,8 +142,8 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold font-heading text-white mb-6">Intelligent Agent Tools</h3>
-                <p className="text-gray-300 leading-relaxed text-lg mb-4">Enable contextual tools like Weather and News with fine-grained per-agent controls. Each agent can be customized with specific capabilities tailored to your workflow needs.</p>
+                <h3 className="text-2xl font-bold font-heading text-white mb-6">Intelligent Agent Tools with Long Memory</h3>
+                <p className="text-gray-300 leading-relaxed text-lg mb-4">Remembers all previous user chats and also provides new chat feature. Enable contextual tools like Weather and News with fine-grained per-agent controls. Each agent can be customized with specific capabilities tailored to your workflow needs.</p>
                 <p className="text-gray-400 text-sm">Extensible architecture supports custom tool integration and advanced automation workflows.</p>
               </div>
               <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 backdrop-blur-sm border border-gray-700/50 p-10 rounded-2xl hover:scale-105 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 animate-slide-up group" style={{animationDelay: '0.3s'}}>
