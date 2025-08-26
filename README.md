@@ -32,7 +32,7 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 ### 💬 **Conversational AI**
 - **Context-Aware Chat** — Production LLM (Llama-3.1-8B via Hugging Face Router) generates coherent responses using user messages and retrieved context.  
 - **Long-Term Chat Memory** — Per-user persistent conversation history + condensed memory storage: preferences, recurring facts, and important entities are remembered and applied in future chats.  
-- **Custom Agents** — Users may create and manage instruction-driven agents (personalities) that influence assistant behavior for different workflows (e.g., “Study Buddy”, “Legal Analyst”).
+- **Custom Agents** — Users may create and manage instruction-driven agents (personalities) that influence assistant behavior for different workflows (e.g., "Study Buddy", "Legal Analyst").
 
 ### ⚙️ **Tools & Integrations**
 - **News Tool** — Fetch curated news for a topic (configurable language/page-size).  
@@ -53,22 +53,20 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 
 ## 🏗️ **Architecture Overview**
 
+```
 ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│ Frontend │ │ Backend │ │ Supabase │
-│ (Next.js 15) │◄──►│ (FastAPI) │◄──►│ (Auth + DB) │
-│ Vercel │ │ Render │ │ (pgvector) │
+│   Frontend      │ │    Backend      │ │   Supabase      │
+│  (Next.js 15)   │◄──►│   (FastAPI)     │◄──►│  (Auth + DB)    │
+│    Vercel       │ │    Render       │ │  (pgvector)     │
 └─────────────────┘ └─────────────────┘ └─────────────────┘
-│
-▼
-┌─────────────────┐
-│ Hugging Face │
-│ Router │
-│ (Llama-3.1-8B) │
-└─────────────────┘
-
-markdown
-Copy
-Edit
+                               │
+                               ▼
+                    ┌─────────────────┐
+                    │  Hugging Face   │
+                    │     Router      │
+                    │ (Llama-3.1-8B)  │
+                    └─────────────────┘
+```
 
 ### **Data Flow**
 1. **Authentication** → User signs in via Supabase, receives JWT token.  
@@ -112,6 +110,8 @@ Edit
 ```bash
 cd backend
 pytest tests/ -v
+```
+
 Tests cover:
 
 ✅ Authentication flows
@@ -122,41 +122,47 @@ Tests cover:
 
 ✅ API endpoints (conversations, agents, tools, memories)
 
-🗺️ Roadmap
-🔄 Short Term
- Streaming Responses - Real-time answer generation (optional)
+---
 
- Multiple File Formats - DOCX, TXT, images (OCR)
+## 🗺️ **Roadmap**
 
- Enhanced Citations - Page-level highlighting and source links
+### 🔄 **Short Term**
+- **Streaming Responses** - Real-time answer generation (optional)
+- **Multiple File Formats** - DOCX, TXT, images (OCR)
+- **Enhanced Citations** - Page-level highlighting and source links
 
-🚀 Medium Term
- Vector DB Optimization - IVFFLAT / HNSW tuning and hybrid search
+### 🚀 **Medium Term**
+- **Vector DB Optimization** - IVFFLAT / HNSW tuning and hybrid search
+- **Team Collaboration** - Shared document workspaces and roles
+- **Custom Models & Fine-tuning** - Domain-specific adaptations
 
- Team Collaboration - Shared document workspaces and roles
+### 🌟 **Long Term**
+- **Multi-Modal Support** - Image & table understanding inside documents
+- **Advanced Analytics** - Product usage, agent metrics, and cost dashboards
+- **Enterprise Features** - SSO, audit logs, compliance & SLA-ready infra
 
- Custom Models & Fine-tuning - Domain-specific adaptations
+---
 
-🌟 Long Term
- Multi-Modal Support - Image & table understanding inside documents
+## 📄 **License**
 
- Advanced Analytics - Product usage, agent metrics, and cost dashboards
-
- Enterprise Features - SSO, audit logs, compliance & SLA-ready infra
-
-📄 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-👨‍💻 Author
-Shreyas Makwana
+---
 
-🌐 Portfolio
+## 👨‍💻 **Author**
 
-💼 LinkedIn
+**Shreyas Makwana**
+
+🌐 [Portfolio](https://portfolio-link-here)
+
+💼 [LinkedIn](https://linkedin.com/in/shreyas-makwana)
+
+---
 
 <div align="center">
-⭐ If you found this project helpful, please give it a star!
+
+⭐ **If you found this project helpful, please give it a star!**
 
 Built with 🔥
 
-</div> ```
+</div>
