@@ -2,7 +2,7 @@
 
 > **Transform your documents into an intelligent conversation partner**
 
-An end-to-end, production-ready AI assistant that brings your documents to life. Upload PDFs, get context-aware answers powered by RAG (Retrieval-Augmented Generation), and experience secure, personalized interactions—all wrapped in a beautiful, modern interface.
+An end-to-end, production-ready AI assistant that brings your documents to life. Upload PDFs, get context-aware answers powered by RAG (Retrieval-Augmented Generation) and a vector database, create custom agents, and experience persistent, personalized conversations with long-term memory — all wrapped in a beautiful, modern interface and secured by Supabase. This repo represents a demo-ready SaaS product complete with frontend, backend, tooling, and deploy configurations.
 
 [![Deploy Status](https://img.shields.io/badge/Deploy-Live-brightgreen)](https://ai-powered-personal-agent-platform.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -13,83 +13,97 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 
 ## 🎯 **What Makes This Special?**
 
-- **🧠 Smart Document Understanding** - Upload PDFs and chat with them like never before
-- **🔐 Bank-Level Security** - Supabase authentication with JWT tokens
-- **⚡ Lightning Fast** - Optimized RAG pipeline with semantic search
-- **🎨 Beautiful UI** - Modern Next.js interface with Tailwind CSS
-- **🚀 Production Ready** - Full deployment pipeline included
-- **📱 Responsive** - Works seamlessly across all devices
+- **🧠 Smart Document Understanding** — Upload PDFs and chat with them naturally; answers are grounded in your files with source citations.  
+- **🧭 Persistent, Personalized Conversations** — Per-user long-term memory stores important facts & preferences so chat sessions remain context-aware across refreshes and re-logins.  
+- **🤖 Custom Agents & Tooling** — Create instruction-driven agents (personalities) and call contextual tools (News, Weather) for multi-modal workflows.  
+- **⚡ Production-Grade RAG + Vector DB** — High-performance embeddings + vector similarity search (pgvector / fallback) deliver fast, relevant retrieval.  
+- **🔐 Enterprise-Style Security** — Supabase Auth + Row-Level Security (RLS) ensure user-scoped data isolation.  
+- **🎨 Polished UI** — A modern Next.js frontend with careful UX: responsive, accessible, and deploy-ready.
 
 ---
 
 ## ✨ **Core Features**
 
 ### 📄 **Document Intelligence**
-- **PDF Upload & Processing** - Automatic chunking and embedding generation
-- **Smart Retrieval** - Find the most relevant information instantly
-- **Source Citations** - Every answer links back to specific document sections
+- **PDF Upload & Processing** — Drag-and-drop PDF ingestion with automatic chunking, OCR-friendly parsing, and embedding generation.  
+- **Semantic Retrieval (RAG)** — Retriever-augmented generation: nearest-neighbor vector search returns source passages that the LLM uses to produce accurate, citeable answers.  
+- **Source Citations** — Every answer can point back to document chunks and pages for traceability.
 
 ### 💬 **Conversational AI**
-- **Context-Aware Chat** - Powered by Llama-3.1-8B via Hugging Face Router
-- **Memory Retention** - Maintains conversation context for natural interactions
-- **Multi-Document Support** - Query across all your uploaded documents
+- **Context-Aware Chat** — Production LLM (Llama-3.1-8B via Hugging Face Router) generates coherent responses using user messages and retrieved context.  
+- **Long-Term Chat Memory** — Per-user persistent conversation history + condensed memory storage: preferences, recurring facts, and important entities are remembered and applied in future chats.  
+- **Custom Agents** — Users may create and manage instruction-driven agents (personalities) that influence assistant behavior for different workflows (e.g., “Study Buddy”, “Legal Analyst”).
+
+### ⚙️ **Tools & Integrations**
+- **News Tool** — Fetch curated news for a topic (configurable language/page-size).  
+- **Weather Tool** — Query live weather data for a specified location.  
+- **Tool Sandbox** — Tools run in an isolated, auditable flow so responses remain secure and reproducible.
+
+### 🧩 **Vector DB & Retrieval**
+- **Embeddings** — Sentence-transformers (all-MiniLM / similar) used to produce dense vectors for chunks.  
+- **Search** — Uses pgvector indexes when available for fast nearest-neighbor search, with a fallback cosine implementation to ensure portability.  
+- **Tunable** — Top-K, vector-depth, and hybrid search parameters are exposed to tune precision/recall tradeoffs.
 
 ### 🔒 **Enterprise Security**
-- **User Authentication** - Secure login with Supabase Auth
-- **Data Isolation** - Your documents are private and user-scoped
-- **JWT Protection** - All API endpoints secured with token validation
+- **User Authentication** — Supabase Auth with JWT tokens (email sign-up / sign-in).  
+- **Data Isolation** — RLS policies enforce that documents, agents, memories, and conversations are scoped to their owner.  
+- **Server-side Service Role** — Backend uses service-role keys for privileged DB operations; sensitive keys kept out of the browser.
 
 ---
 
 ## 🏗️ **Architecture Overview**
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │    Backend      │    │   Supabase      │
-│   (Next.js 15)  │◄──►│   (FastAPI)     │◄──►│  (Auth + DB)    │
-│   Vercel        │    │   Render        │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │  Hugging Face   │
-                       │     Router      │
-                       │ (Llama-3.1-8B)  │
-                       └─────────────────┘
-```
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ Frontend │ │ Backend │ │ Supabase │
+│ (Next.js 15) │◄──►│ (FastAPI) │◄──►│ (Auth + DB) │
+│ Vercel │ │ Render │ │ (pgvector) │
+└─────────────────┘ └─────────────────┘ └─────────────────┘
+│
+▼
+┌─────────────────┐
+│ Hugging Face │
+│ Router │
+│ (Llama-3.1-8B) │
+└─────────────────┘
+
+markdown
+Copy
+Edit
 
 ### **Data Flow**
-1. **Authentication** → User logs in via Supabase, receives JWT token
-2. **Document Upload** → PDF processed, chunked, and embedded
-3. **Query Processing** → RAG retrieval finds relevant chunks
-4. **AI Generation** → Llama-3.1-8B generates contextual responses
-5. **Citation Linking** → Responses include source references
+1. **Authentication** → User signs in via Supabase, receives JWT token.  
+2. **Document Upload** → PDFs uploaded from the browser → backend parses, chunks, and stores embeddings and metadata.  
+3. **Query Processing** → User asks a question → backend performs vector search (RAG) and retrieves best chunks.  
+4. **AI Generation** → Llama-3.1-8B (via Hugging Face Router or configured provider) generates the final answer using retrieved context + optional agent system prompt.  
+5. **Persistence** → Conversation messages and condensed long-term memories are stored for future sessions.  
+6. **Tools** → News/Weather tools can be invoked; results are surfaced, cited, and optionally persisted as part of conversation.
 
 ---
 
 ## 🛠️ **Tech Stack**
 
 ### **Frontend**
-- ![Next.js](https://img.shields.io/badge/-Next.js_15-black?logo=next.js) **Next.js 15** - React framework with App Router
-- ![React](https://img.shields.io/badge/-React_19-blue?logo=react) **React 19** - Latest React features
-- ![TypeScript](https://img.shields.io/badge/-TypeScript-blue?logo=typescript) **TypeScript** - Type-safe development
-- ![Tailwind](https://img.shields.io/badge/-Tailwind_CSS-teal?logo=tailwindcss) **Tailwind CSS** - Utility-first styling
+- ![Next.js](https://img.shields.io/badge/-Next.js_15-black?logo=next.js) **Next.js 15** - App Router, React 19  
+- ![React](https://img.shields.io/badge/-React_19-blue?logo=react) **React 19**  
+- ![TypeScript](https://img.shields.io/badge/-TypeScript-blue?logo=typescript) **TypeScript**  
+- ![Tailwind](https://img.shields.io/badge/-Tailwind_CSS-teal?logo=tailwindcss) **Tailwind CSS**
 
 ### **Backend**
-- ![FastAPI](https://img.shields.io/badge/-FastAPI-teal?logo=fastapi) **FastAPI** - Modern Python web framework
-- ![Python](https://img.shields.io/badge/-Python-yellow?logo=python) **Uvicorn** - High-performance ASGI server
-- ![Pydantic](https://img.shields.io/badge/-Pydantic_v2-red) **Pydantic v2** - Data validation and settings
+- ![FastAPI](https://img.shields.io/badge/-FastAPI-teal?logo=fastapi) **FastAPI**  
+- ![Python](https://img.shields.io/badge/-Python-yellow?logo=python) **Python + Uvicorn**  
+- **Pydantic v2** - Settings & validation  
+- **pgvector / Postgres** - Vector storage & indexes (pgvector if enabled)
 
 ### **Infrastructure & Services**
-- ![Vercel](https://img.shields.io/badge/-Vercel-black?logo=vercel) **Vercel** - Frontend deployment
-- ![Render](https://img.shields.io/badge/-Render-purple) **Render** - Backend hosting
-- ![Supabase](https://img.shields.io/badge/-Supabase-green?logo=supabase) **Supabase** - Auth & PostgreSQL database
+- ![Vercel](https://img.shields.io/badge/-Vercel-black?logo=vercel) **Vercel** - Frontend hosting  
+- ![Render](https://img.shields.io/badge/-Render-purple) **Render** - Backend hosting  
+- ![Supabase](https://img.shields.io/badge/-Supabase-green?logo=supabase) **Supabase** - Auth, Postgres, RLS
 
 ### **AI & ML**
-- ![Hugging Face](https://img.shields.io/badge/-Hugging_Face-yellow?logo=huggingface) **Hugging Face Router** - OpenAI-compatible API
-- **Llama-3.1-8B** - Large language model for generation
-- **Sentence Transformers** - Document embeddings
-- **PyMuPDF** - PDF parsing and text extraction
+- ![Hugging Face](https://img.shields.io/badge/-Hugging_Face-yellow?logo=huggingface) **Hugging Face Router** - OpenAI-compatible interface  
+- **Llama-3.1-8B** - Primary generation model (configurable)  
+- **Sentence Transformers** - Embedding model for semantic search  
+- **PyMuPDF** - PDF parsing & text extraction
 
 ---
 
@@ -98,53 +112,51 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 ```bash
 cd backend
 pytest tests/ -v
-```
-
 Tests cover:
-- ✅ Authentication flows
-- ✅ Document processing
-- ✅ RAG pipeline
-- ✅ API endpoints
 
----
+✅ Authentication flows
 
-## 🗺️ **Roadmap**
+✅ Document processing & chunking
 
-### **🔄 Short Term**
-- [ ] **Streaming Responses** - Real-time answer generation
-- [ ] **Multiple File Formats** - Support for DOCX, TXT, etc.
-- [ ] **Enhanced Citations** - Page-level highlighting
+✅ RAG pipeline & retrieval correctness
 
-### **🚀 Medium Term**  
-- [ ] **Vector DB Optimization** - Hybrid search capabilities
-- [ ] **Team Collaboration** - Shared document workspaces
-- [ ] **Custom Models** - Fine-tuned domain-specific AI
+✅ API endpoints (conversations, agents, tools, memories)
 
-### **🌟 Long Term**
-- [ ] **Multi-Modal Support** - Images and tables understanding
-- [ ] **Advanced Analytics** - Usage insights and document metrics
-- [ ] **Enterprise Features** - SSO, audit logs, compliance
+🗺️ Roadmap
+🔄 Short Term
+ Streaming Responses - Real-time answer generation (optional)
 
----
+ Multiple File Formats - DOCX, TXT, images (OCR)
 
-## 📄 **License**
+ Enhanced Citations - Page-level highlighting and source links
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+🚀 Medium Term
+ Vector DB Optimization - IVFFLAT / HNSW tuning and hybrid search
 
----
+ Team Collaboration - Shared document workspaces and roles
 
-## 👨‍💻 **Author**
+ Custom Models & Fine-tuning - Domain-specific adaptations
 
-**Shreyas Makwana**  
-- 🌐 [Portfolio](https://portfolio-website-shreyas.vercel.app/)
-- 💼 [LinkedIn](www.linkedin.com/in/shreyas-makwana)
+🌟 Long Term
+ Multi-Modal Support - Image & table understanding inside documents
 
----
+ Advanced Analytics - Product usage, agent metrics, and cost dashboards
+
+ Enterprise Features - SSO, audit logs, compliance & SLA-ready infra
+
+📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+👨‍💻 Author
+Shreyas Makwana
+
+🌐 Portfolio
+
+💼 LinkedIn
 
 <div align="center">
+⭐ If you found this project helpful, please give it a star!
 
-**⭐ If you found this project helpful, please give it a star!**
+Built with 🔥
 
-*Built with 🔥*
-
-</div>
+</div> ```
