@@ -67,6 +67,7 @@ export default function AppPage() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+
     router.push('/');
   };
 
