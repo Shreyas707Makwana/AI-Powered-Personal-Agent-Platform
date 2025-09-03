@@ -3,6 +3,7 @@
   "devCommand": "npm run dev",
   "framework": "nextjs",
   "rewrites": [
+
     {
       "source": "/api/(.*)",
       "destination": "https://ai-powered-personal-agent-platform.onrender.com/api/$1"
