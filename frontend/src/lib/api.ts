@@ -19,13 +19,13 @@ export interface ToolRegistryItem {
 // -----------------------------
 
 export async function listConversations(): Promise<ConversationRow[]> {
-  const response = await authenticatedFetch(`/api/conversations`);
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/conversations`);
   if (!response.ok) throw new Error(`Failed to list conversations: ${response.status}`);
   return await response.json();
 }
 
 export async function createConversation(data?: { title?: string }): Promise<ConversationRow> {
-  const response = await authenticatedFetch(`/api/conversations`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/conversations`, {
     method: 'POST',
     body: JSON.stringify(data || {}),
   });
@@ -34,7 +34,7 @@ export async function createConversation(data?: { title?: string }): Promise<Con
 }
 
 export async function deleteConversation(conversationId: string): Promise<{ ok: boolean; deleted_messages?: number; deleted_conversations?: number; }> {
-  const response = await authenticatedFetch(`/api/conversations/${conversationId}`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/conversations/${conversationId}`, {
     method: 'DELETE',
   });
   if (!response.ok) throw new Error(`Failed to delete conversation: ${response.status}`);
@@ -42,7 +42,7 @@ export async function deleteConversation(conversationId: string): Promise<{ ok: 
 }
 
 export async function listConversationMessages(conversationId: string): Promise<ConversationMessageRow[]> {
-  const response = await authenticatedFetch(`/api/conversations/${conversationId}/messages`);
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/conversations/${conversationId}/messages`);
   if (!response.ok) throw new Error(`Failed to list messages: ${response.status}`);
   return await response.json();
 }
@@ -51,7 +51,7 @@ export async function postConversationMessage(
   conversationId: string,
   data: { role: 'user' | 'assistant' | 'agent'; content: string; agent_id?: string | null; tool_used?: string | null }
 ): Promise<ConversationMessageRow> {
-  const response = await authenticatedFetch(`/api/conversations/${conversationId}/messages`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/conversations/${conversationId}/messages`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -206,7 +206,7 @@ export interface UpdateAgentRequest {
 export async function fetchDocuments(): Promise<Document[]> {
   const authHeaders = await getAuthHeaders();
   
-  const response = await fetch(`/api/ingest/documents`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ingest/documents`, {
     headers: authHeaders
   });
   
@@ -234,7 +234,7 @@ export async function uploadDocument(file: File): Promise<UploadResponse> {
   }
   
   // For file uploads, don't set Content-Type - let browser set multipart/form-data
-  const response = await fetch(`/api/ingest/upload`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ingest/upload`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${session.access_token}`,
@@ -254,19 +254,19 @@ export async function uploadDocument(file: File): Promise<UploadResponse> {
 // -----------------------------
 
 export async function listTools(): Promise<ToolRegistryItem[]> {
-  const response = await fetch(`/api/tools`);
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tools`);
   if (!response.ok) throw new Error(`Failed to list tools: ${response.status}`);
   return await response.json();
 }
 
 export async function listAgentTools(agentId: string): Promise<AgentToolRow[]> {
-  const response = await authenticatedFetch(`/api/agents/${agentId}/tools`);
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agents/${agentId}/tools`);
   if (!response.ok) throw new Error(`Failed to list agent tools: ${response.status}`);
   return await response.json();
 }
 
 export async function updateAgentTool(agentId: string, toolKey: string, data: { enabled?: boolean; config?: unknown; }): Promise<AgentToolRow> {
-  const response = await authenticatedFetch(`/api/agents/${agentId}/tools/${toolKey}` , {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agents/${agentId}/tools/${toolKey}` , {
     method: 'PUT',
     body: JSON.stringify(data || {}),
   });
@@ -275,7 +275,7 @@ export async function updateAgentTool(agentId: string, toolKey: string, data: { 
 }
 
 export async function executeTool<T = unknown>(body: { agent_id?: string | null; tool_key: string; params: Record<string, unknown>; }): Promise<ExecuteToolResponse<T>> {
-  const response = await authenticatedFetch(`/api/tools/execute`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tools/execute`, {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -295,8 +295,7 @@ export async function sendChat(
   
   const authHeaders = await getAuthHeaders();
   
-  const response = await fetch(`/api/llm/chat`, {
-
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/llm/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -325,7 +324,7 @@ export async function sendChat(
 export async function getCurrentUserProfile() {
   const authHeaders = await getAuthHeaders();
   
-  const response = await fetch(`/api/me`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/me`, {
     headers: authHeaders
   });
   
@@ -345,7 +344,7 @@ export async function getCurrentUserProfile() {
  * Create a new agent
  */
 export async function createAgent(data: CreateAgentRequest): Promise<Agent> {
-  const response = await authenticatedFetch(`/api/agents`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agents`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -361,7 +360,7 @@ export async function createAgent(data: CreateAgentRequest): Promise<Agent> {
  * List all agents for the current user
  */
 export async function listAgents(): Promise<Agent[]> {
-  const response = await authenticatedFetch(`/api/agents`);
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agents`);
   
   if (!response.ok) {
     throw new Error(`Failed to list agents: ${response.status} ${response.statusText}`);
@@ -374,7 +373,7 @@ export async function listAgents(): Promise<Agent[]> {
  * Get a specific agent by ID
  */
 export async function getAgent(agentId: string): Promise<Agent> {
-  const response = await authenticatedFetch(`/api/agents/${agentId}`);
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agents/${agentId}`);
   
   if (!response.ok) {
     throw new Error(`Failed to get agent: ${response.status} ${response.statusText}`);
@@ -387,7 +386,7 @@ export async function getAgent(agentId: string): Promise<Agent> {
  * Update an agent
  */
 export async function updateAgent(agentId: string, data: UpdateAgentRequest): Promise<Agent> {
-  const response = await authenticatedFetch(`/api/agents/${agentId}`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agents/${agentId}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
@@ -403,7 +402,7 @@ export async function updateAgent(agentId: string, data: UpdateAgentRequest): Pr
  * Delete an agent
  */
 export async function deleteAgent(agentId: string): Promise<void> {
-  const response = await authenticatedFetch(`/api/agents/${agentId}`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/agents/${agentId}`, {
     method: 'DELETE',
   });
   

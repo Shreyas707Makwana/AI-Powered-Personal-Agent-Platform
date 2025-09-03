@@ -425,7 +425,7 @@ export default function Chat({ selectedDocId, onDocumentsRefresh }: ChatProps) {
                                   </span>
                                 </div>
                                 <a
-                                  href={`/api/ingest/documents/${citation.document_id}`}
+                                  href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ingest/documents/${citation.document_id}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="access-link"
