@@ -9,6 +9,10 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Latest-teal)](https://fastapi.tiangolo.com/)
 
+## 🎥 **Demo Video**
+
+🎬 **[Watch the Live Demo](https://drive.google.com/file/d/1txMLvy2hL_budLGPTd3Sw7WOANTfUMKz/view?usp=sharing)** - See the platform in action with document upload, RAG-powered conversations, and AI agent interactions.
+
 ---
 
 ## 🎯 **What Makes This Special?**
