@@ -9,8 +9,8 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Latest-teal)](https://fastapi.tiangolo.com/)
 
-##NOTE: 
-  Sometimes on Render the Backend Deployment instance is failed as Render only provides 512 MB of free service and my Backend takes more than that.
+
+> **⚠️ NOTE:** Sometimes LIVE LINK will be inactive as on RENDER the Backend Deployment instance is failed as Render only provides 512 MB of free service and my Backend takes more than that.
 
 ---
 
