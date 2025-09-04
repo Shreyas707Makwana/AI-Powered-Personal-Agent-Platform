@@ -14,6 +14,13 @@ An end-to-end, production-ready AI assistant that brings your documents to life.
 
 ---
 
+## ⚠️ **Important Notice - Backend Deployment**
+
+> **📋 NOTE:** Sometimes on Render the Backend Deployment instance may fail as Render only provides 512 MB of free service and this backend requires more memory than that. If you experience connectivity issues, this is likely the cause. The backend will automatically restart, but there may be temporary downtime.
+
+---
+---
+
 <div align="center">
 
 ## 🎥 **🔥 WATCH THE DEMO VIDEO 🔥**
